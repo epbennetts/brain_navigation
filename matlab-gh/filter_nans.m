@@ -13,7 +13,7 @@ rowLabels = structInfo;
 propNansRows = mean(isnan(genes),2);
 propNansCols = mean(isnan(genes),1);
 
-%histogram of what comes out of each of these commands. 
+%histogram of what comes out of each of these commands.
 figure(1);
 histogram(propNansRows, 'Normalization', 'probability');
 title('Proportion of nans in rows');
@@ -55,7 +55,7 @@ avgNotTarget = mean(~isnan(notTarget),1);
 %set remaining nans to average of their area (target or not target)
 for i = 1:rows
     for j = 1:cols
-        if isnan(genes(i,j))    
+        if isnan(genes(i,j))
             %doReplace = (isnan(genes(i,:)));
             if targetIndices(i) == 1
                 genes(i,j) = avgTarget(j);
