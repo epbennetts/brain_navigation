@@ -1,11 +1,9 @@
-%TO DO 
-%put cols into DT
+function [genes, targetIndices] = filter_nans()
 
 clear vars;
 %load new dataset (have to check which section)
-load("C:\Users\elobe\Dropbox\1_HONOURS\code\data\AllenGeneDataset_19419_Ben.mat", '-mat')
+load("C:\Users\elobe\Dropbox\1_HONOURS\code\data\AllenGeneDataset_19419_Ben.mat", '-mat');
 genes = GeneExpData.combZ.energy; %for example
-[rows, cols] = size(genes);
 colLabels = geneInfo;
 rowLabels = structInfo;
 
@@ -14,12 +12,12 @@ propNansRows = mean(isnan(genes),2);
 propNansCols = mean(isnan(genes),1);
 
 %histogram of what comes out of each of these commands.
-figure(1);
-histogram(propNansRows, 'Normalization', 'probability');
-title('Proportion of nans in rows');
-figure(2);
-histogram(propNansCols,'Normalization', 'probability', 'BinLimits',[0,0.3]);
-title('Proportion of nans in columns')
+% figure(1);
+% histogram(propNansRows, 'Normalization', 'probability');
+% title('Proportion of nans in rows');
+% figure(2);
+% histogram(propNansCols,'Normalization', 'probability', 'BinLimits',[0,0.3]);
+% title('Proportion of nans in columns')
 
 max_nans_rows = 0.1;
 max_nans_cols = 0.1;
@@ -69,3 +67,5 @@ for i = 1:rows
 end
 
 nans_left = genes(isnan(genes));  % --> none left
+
+end
