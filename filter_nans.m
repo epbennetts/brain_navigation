@@ -1,4 +1,4 @@
-function [genes, targetIndices] = filter_nans()
+function [genes, targetIndices, classes] = filter_nans()
 
 clear vars;
 %load new dataset (have to check which section)
@@ -47,6 +47,18 @@ notTargetIndices = (targetIndices == 0);
 target = genes(targetIndices, :);
 notTarget = genes(notTargetIndices, :);
 
+%make string of classes
+classes = strings(rows,1);
+for i = 1:rows
+    if targetIndices(i) == 1
+       classes(i) = "target";
+    elseif targetIndices(i) == 0
+        classes(i) = "~target";
+    else 
+        print("Error: element is not 'target' or 'not-target'.");    
+    end
+end
+
 avgTarget = mean(~isnan(target),1);
 avgNotTarget = mean(~isnan(notTarget),1);
 
@@ -60,7 +72,7 @@ for i = 1:rows
             elseif targetIndices(i) == 0
                 genes(i,j) = avgNotTarget(j);
             else
-                print("Error: element does not belong to target or not-target.")
+                print("Error: element does not belong to target or not-target.");
             end
         end
     end
