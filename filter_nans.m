@@ -1,4 +1,4 @@
-function [genes, targetIndices, classes] = filter_nans()
+function [genes, targetIndices, classes, geneNames] = filter_nans()
 
 clear vars;
 %load new dataset (have to check which section)
@@ -79,5 +79,7 @@ for i = 1:rows
 end
 
 nans_left = genes(isnan(genes));  % --> none left
+
+geneNames = table2array(colLabels(:,1));
 
 end
