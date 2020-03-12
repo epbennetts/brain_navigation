@@ -1,4 +1,4 @@
-function [genes, targetIndices, classes, geneNames] = filter_nans()
+function [genes, target, notTarget, classes, geneNames] = filter_nans()
 
 clear vars;
 %load new dataset (have to check which section)
