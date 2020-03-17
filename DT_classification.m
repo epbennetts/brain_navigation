@@ -7,7 +7,7 @@ clear vars;
 [rows, cols] = size(genes);
 
 %num of trees we want to check
-samples = cols;
+samples = 1000;
 plotting = 1:5;
 losses = zeros(1,samples);
 margins = zeros(rows,samples);
@@ -23,6 +23,7 @@ for i = 1:samples
     
     %test
     labels = predict(tree,gene);
+    threshold = edge(tree, gene, classes);
     
     % calc accuracy
     correct = zeros(rows,1);
@@ -43,51 +44,71 @@ for i = 1:samples
 %             title(sprintf('Gene %d with accuracy %g', i, accuracies(i)));
 %             hold on;
 %             histogram(notTarget(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
+%             xline(threshold, '--r');
 %             hold off;
 %             legend({'target', '~target'});
 %         end
 end
 
 %sort accuracies
-[sorted_accuracies, indexOrder] = sort(accuracies, 'descend');
-numGenes = size(sorted_accuracies, 1);
+[ranked_accuracies, indexOrder] = sort(accuracies, 'descend');
+numGenes = size(ranked_accuracies, 1);
 numGenesArray = 1:numGenes;
 
 %all genes ranked
-genes_ranked = strings(samples,1);
+genenames_ranked = strings(samples,1);
 for i = 1:size(indexOrder,1)
     geneIndex = indexOrder(i);
     gene = string(geneNames(geneIndex));
-    genes_ranked(i) = gene;
+    genenames_ranked(i) = gene;
 end
 
 %plot the accuracies overall
 figure;
-plot(numGenesArray, sorted_accuracies, '.');
+plot(numGenesArray, ranked_accuracies, '.');
 xlabel('num genes');
 ylabel('accuracy');
 
 
-%testing vars
-count = [];
-counter = 0;
+% %testing vars
+% count = [];
+% counter = 0;
 
 %it's treating i as an entire vector when it's a column vector, not actually looping 
-indices_ordered = indexOrder(1:5)';
-for i = indexOrder(1:5)'
-    counter = counter +1;
-    count = [count i];
+%various plotting thresholds
+plots = 5;
+middleStart = samples*0.2;
+middleEnd = middleStart + plots;
+bottomStart = samples - plots;
+bottomEnd = samples;
+%top 5
+ordered_range = indexOrder(1:plots)';
+%middle 5
+ordered_range = indexOrder(middleStart:middleEnd)';
+%bottom 5
+ordered_range = indexOrder(bottomStart:bottomEnd)';
+
+thresholds = [];
+for i = ordered_range
+%     counter = counter +1;
+%     count = [count i];
     
     gene = genes(:,i);
     tree = fitctree(gene, classes, 'MaxNumSplits', 1);
+    threshold = edge(tree, gene, classes);
+    thresholds = [thresholds threshold];
     
     %view trees and corresponding distributions
     view(tree,'Mode','graph')
     figure;
     histogram(target(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
-    title(sprintf('Gene %d with accuracy %g', i, accuracies(i)));
+    title(sprintf('%s : Gene %d with accuracy %g', geneNames{i}, i, accuracies(i)));
+    if strcmp(genenames_ranked(i), geneNames(indexOrder(i)))
+       sprintf("Error: genenames_ranked(i) is %s and geneNames(indexOrder(i) is %s.", genenames_ranked(i), geneNames{indexOrder(i)}); 
+    end
     hold on;
     histogram(notTarget(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
+    xline(threshold, '--r');
     hold off;
     legend({'target', '~target'});
        
