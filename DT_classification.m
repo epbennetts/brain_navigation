@@ -11,7 +11,7 @@ samples = 1000;
 plotting = 1:5;
 losses = zeros(1,samples);
 margins = zeros(rows,samples);
-thresholds = zeros(samples);
+thresholds = zeros(samples,1);
 
 %loop, make trees, classify and evaluate
 accuracies = zeros(samples,1);
@@ -24,6 +24,7 @@ for i = 1:samples
     %test
     labels = predict(tree,gene);
     threshold = edge(tree, gene, classes);
+    thresholds(i) = threshold;
     
     % calc accuracy
     correct = zeros(rows,1);
@@ -76,19 +77,19 @@ ylabel('accuracy');
 
 %it's treating i as an entire vector when it's a column vector, not actually looping 
 %various plotting thresholds
-plots = 5;
+plots = 10;
 middleStart = samples*0.2;
 middleEnd = middleStart + plots;
 bottomStart = samples - plots;
 bottomEnd = samples;
 %top 5
-ordered_range = indexOrder(1:plots)';
+%ordered_range = indexOrder(1:plots)';
 %middle 5
 ordered_range = indexOrder(middleStart:middleEnd)';
 %bottom 5
-ordered_range = indexOrder(bottomStart:bottomEnd)';
+%ordered_range = indexOrder(bottomStart:bottomEnd)';
 
-thresholds = [];
+thresholds_ranked = [];
 for i = ordered_range
 %     counter = counter +1;
 %     count = [count i];
@@ -96,7 +97,7 @@ for i = ordered_range
     gene = genes(:,i);
     tree = fitctree(gene, classes, 'MaxNumSplits', 1);
     threshold = edge(tree, gene, classes);
-    thresholds = [thresholds threshold];
+    thresholds_ranked = [thresholds_ranked threshold];
     
     %view trees and corresponding distributions
     view(tree,'Mode','graph')
