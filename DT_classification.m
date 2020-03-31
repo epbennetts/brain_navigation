@@ -7,7 +7,7 @@ clear vars;
 [rows, cols] = size(genes);
 
 %num of trees we want to check
-samples = 1000;
+samples = cols;
 plotting = 1:5;
 losses = zeros(1,samples);
 margins = zeros(rows,samples);
@@ -50,6 +50,10 @@ for i = 1:samples
 %             legend({'target', '~target'});
 %         end
 end
+
+%accuracies histogram
+histogram(accuracies, 'Normalization', 'count', 'BinWidth', 0.01);
+title("Histogram of accuracies for a single gene");
 
 %sort accuracies
 [ranked_accuracies, indexOrder] = sort(accuracies, 'descend');

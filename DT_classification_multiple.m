@@ -6,27 +6,47 @@ clear vars;
 [genes, target, nonTarget, classes, geneNames] = filter_nans;
 [rows, cols] = size(genes);
 
-% %num of trees we want to check
-% samples = 100;
-% plotting = 1:5;
-% losses = zeros(1,samples);
-% margins = zeros(rows,samples);
-% %should have multiple thresholds
-% threshold = zeros(samples);
+%num of trees we want to check
+samples = 100;
+plotting = 41:50;
+losses = zeros(1,samples);
+margins = zeros(rows,samples);
+%should have multiple thresholds
+%needs to be fixed
+threshold_old = zeros(samples);
 
-%%loop, make trees, classify and evaluate
-%accuracies = zeros(samples,1);
-%for i = 1:samples
-    a = 15;
-    b = 16;
-    gene_pair = genes(:,a:b); %gene = genes(:,i:i+1);
+%loop, make trees, classify and evaluate
+accuracies = zeros(samples,1);
+bestGeneIndex_fixed = 1237;
+a = bestGeneIndex_fixed;
+genes_used = cell(samples, 2);
+
+%edit: 1:samples exc a
+for i = 1:samples
+    %should we repeat first one as well for comparison??
+%     if i == a
+%         continue;
+%     end
+    
+    b = i;    
+    gene_pair = [genes(:,a) genes(:,b)]; %gene = genes(:,i:i+1);
     
     %train
     tree = fitctree(gene_pair, classes, 'MaxNumSplits', 2);
     
+    %check predictor index (should be index of best gene)
+    gene_used = tree.CutPredictor;    
+    genes_used{i,1} = gene_used{1};
+    genes_used{i,2} = gene_used{2};
+    %check e.g. gene 7
+    if i == 7
+        thresholds = tree.CutPoint;
+    end
+    %gene_index_used = tree.CutPredictorIndex;
+    
     %test
     labels = predict(tree,gene_pair);
-    threshold = edge(tree, gene_pair, classes);
+    threshold_old = edge(tree, gene_pair, classes);
     
     % calc accuracy
     correct = zeros(rows,1);
@@ -35,12 +55,8 @@ clear vars;
     end
     accuracies(a) = mean(correct,1);
     
-    %calc margin
-    %margin = mean(kfoldMargin(tree));
-    %margins(:,i) = margin;
-    
     %if i is in the range of elements we want to plot:
-%         if ismembertol(i,plotting)
+         if ismembertol(i,plotting)
             view(tree,'Mode','graph')
             figure;
             %better to do a scatter plot I think...
@@ -48,15 +64,15 @@ clear vars;
             title(sprintf('Genes %d and %d with accuracy %g', a, b, accuracies(a)));
             hold on;
             plot(nonTarget(:,a),nonTarget(:,b), '.r');
-            xline(threshold, '--');
-            yline(threshold, '--');
+            xline(threshold_old, '--');
+            yline(threshold_old, '--');
             %but don't we have 2 thresholds
             %better way to do this is with the other functions
             hold off;
             legend({'target', '~target'});
-%         end
-%end
-% 
+         end
+end
+ 
 % %sort accuracies
 % [ranked_accuracies, indexOrder] = sort(accuracies, 'descend');
 % numGenes = size(ranked_accuracies, 1);
