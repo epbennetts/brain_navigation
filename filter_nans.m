@@ -1,4 +1,4 @@
-function [genes, target, notTarget, classes, geneNames] = filter_nans()
+function [genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans()
 
 clear vars;
 %load new dataset (have to check which section)
@@ -45,7 +45,7 @@ area = "Isocortex";
 targetIndices = (strcmp(area, areas));
 notTargetIndices = (targetIndices == 0);
 target = genes(targetIndices, :);
-notTarget = genes(notTargetIndices, :);
+nonTarget = genes(notTargetIndices, :);
 
 %make string of classes
 classes = strings(rows,1);
@@ -60,7 +60,7 @@ for i = 1:rows
 end
 
 avgTarget = mean(~isnan(target),1);
-avgNotTarget = mean(~isnan(notTarget),1);
+avgNotTarget = mean(~isnan(nonTarget),1);
 
 %set remaining nans to average of their area (target or not target)
 for i = 1:rows
