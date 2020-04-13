@@ -3,11 +3,11 @@
 close all force;
 clear vars;
 
-[genes, target, notTarget, classes, geneNames] = filter_nans;
+[genes, targetIndices, classes, geneNames] = filter_nans;
 [rows, cols] = size(genes);
 
 %num of trees we want to check
-samples = cols;
+samples = 100;
 plotting = 1:5;
 losses = zeros(1,samples);
 margins = zeros(rows,samples);
