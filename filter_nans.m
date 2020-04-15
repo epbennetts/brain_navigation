@@ -1,7 +1,7 @@
 function [genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans(area)
 %function [genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans(area)
 
-clear vars;
+
 %load new dataset (have to check which section)
 load("C:\Users\elobe\Dropbox\1_HONOURS\code\data\AllenGeneDataset_19419_Ben.mat", '-mat');
 genes = GeneExpData.combZ.energy; %for example
@@ -54,8 +54,8 @@ for i = 1:rows
        classes(i) = "target";
     elseif targetIndices(i) == 0
         classes(i) = "~target";
-    else 
-        print("Error: element is not 'target' or 'not-target'.");    
+    else
+        print("Error: element is not 'target' or 'not-target'.");
     end
 end
 
