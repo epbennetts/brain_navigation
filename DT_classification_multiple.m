@@ -121,13 +121,18 @@ function [indexOrder, accuracies_ranked, genenames_ranked, thresholds_all] = DT_
     %sort accuracies
     [accuracies_ranked, indexOrder] = sort(accuracies_new, 'descend');
 
-    %all genes ranked
-    genenames_ranked = strings(samples,1);
-    for i = 1:size(indexOrder,1)
-        geneIndex = indexOrder(i);
-        genesStr = string(geneNames(geneIndex));
-        genenames_ranked(i) = genesStr;
-    end
+    % indexOrder ~ [4,2,3,1]
+    % X = [5,6,2,1]; X(indexOrder) => [1,6,2,5]
+
+    % geneNamesRanked = genenames{indexOrder};
+
+    % %all genes ranked
+    % genenames_ranked = strings(samples,1);
+    % for i = 1:size(indexOrder,1)
+    %     geneIndex = indexOrder(i);
+    %     genesStr = string(geneNames(geneIndex));
+    %     genenames_ranked(i) = genesStr;
+    % end
 
 
     %plot the accuracies overall
