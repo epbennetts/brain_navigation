@@ -1,4 +1,4 @@
-function [genes, targetIndices, classes, geneNames] = filter_nans(area)
+function [genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans(area)
 %function [genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans(area)
 
 clear vars;

@@ -3,7 +3,7 @@
 close all force;
 clear vars;
 
-[genes, targetIndices, classes, geneNames] = filter_nans;
+[genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans;
 [rows, cols] = size(genes);
 
 %num of trees we want to check
