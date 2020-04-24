@@ -1,5 +1,5 @@
 
-function [] = DT_plot_multiple(genes, geneNames, target, nonTarget, thresholds_all, numplots, range)
+function [] = DT_plot_multiple(genes, geneNames, target, nonTarget, thresholds_all, samples, indexOrder, numplots, range)
 %inputs: thresholds, ..., numplots, range
 %does: plots the gene expression plots with thresholds for the given 
 
@@ -10,27 +10,23 @@ middleEnd = middleStart + plots - 1;
 bottomStart = samples - plots + 1;
 bottomEnd = samples;
 
-if strcmp(range,top)
+if strcmp(range,'top')
     %top n
     ordered_range = indexOrder(1:plots)';
-elseif strcmp(range, middle)
+elseif strcmp(range, 'middle')
     %middle n
     ordered_range = indexOrder(middleStart:middleEnd)';
-elseif strcmp(range, bottom)
+elseif strcmp(range, 'bottom')
     %bottom n
     ordered_range = indexOrder(bottomStart:bottomEnd)';
 end
 
 %make various plots in a certain accuracy range
+prevGeneData = genes(:, prev_best_genes);
 for i = ordered_range
-    %set gene pair
-    if numgenes == 1
-        gene_combo = genes(:,i);
-    elseif numgenes == 2
-        gene_combo = [genes(:,a) genes(:,i)]; %gene = genes(:,i:i+1);
-    elseif numgenes == 3
-        gene_combo = [genes(:,a) genes(:,b) genes(:,i)];
-    end
+    
+    % Set gene data for this iteration:
+    gene_combo = [prevGeneData genes(:,i)];
     
     %train
     tree = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes);
@@ -50,20 +46,22 @@ for i = ordered_range
     if (numgenes == 1)
         histogram(target(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
         title(sprintf('%s : Gene %d with accuracy %g', geneNames{i}, i, accuracies(i)));
-        if strcmp(genenames_ranked(i), geneNames(indexOrder(i)))
-            sprintf("Error: genenames_ranked(i) is %s and geneNames(indexOrder(i) is %s.", genenames_ranked(i), geneNames{indexOrder(i)});
+        if strcmp(geneNames_ranked(i), geneNames(indexOrder(i)))
+            sprintf("Error: geneNames_ranked(i) is %s and geneNames(indexOrder(i) is %s.", geneNames_ranked{i}, geneNames{indexOrder(i)});
         end
         hold on;
         histogram(nonTarget(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
-        xline(t1, '--r');
+        if ~isnan(thresholds_all(i,1))
+            xline(t1, '--r');
+        end        
         hold off;
         legend({'target', '~target'});
         
     elseif (numgenes == 2)
-        plot(target(:,a),target(:,i), '.b');
-        title(sprintf('Genes %d and %d with accuracy %g', a, i, accuracies(i)));
+        plot(target(:,prev_best_genes),target(:,i), '.b');
+        title(sprintf('Genes %d and %d with accuracy %g', prev_best_genes, i, accuracies(i)));
         hold on;
-        plot(nonTarget(:,a),nonTarget(:,i), '.r');
+        plot(nonTarget(:,prev_best_genes), nonTarget(:,i), '.r');
         %disp("xline:");
         %disp(i);
         %disp(t1);
@@ -75,7 +73,5 @@ for i = ordered_range
         legend({'target', '~target'});
     elseif numgenes == 3
         %unsure
-    end
-    
-end
+    end    
 end
