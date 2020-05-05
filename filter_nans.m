@@ -1,5 +1,5 @@
-function [genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans(area)
-%function [genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans(area)
+function [genes, isTarget, classes, geneNames] = filter_nans(area)
+%%function [genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans(area)
 
 
 %load new dataset (have to check which section)
@@ -42,22 +42,27 @@ areas = table2array(rowLabels(:,5));
 %isocortex) --> later
 
 %calc average of target and ~target elements
-targetIndices = (strcmp(area, areas));
-nonTargetIndices = (targetIndices == 0);
-target = genes(targetIndices, :);
+isTarget = (strcmp(area, areas));
+nonTargetIndices = (isTarget == 0);
+target = genes(isTarget, :);
 nonTarget = genes(nonTargetIndices, :);
+% COULD BE EASIER?:
+%targetIndices = find(isTarget);
+%nonTargetIndices = find(~isTarget);
+
 
 %make string of classes
-classes = strings(rows,1);
-for i = 1:rows
-    if targetIndices(i) == 1
-       classes(i) = "target";
-    elseif targetIndices(i) == 0
-        classes(i) = "~target";
-    else
-        print("Error: element is not 'target' or 'not-target'.");
-    end
-end
+classes = isTarget;
+% classes = strings(rows,1);
+% for i = 1:rows
+%     if isTarget(i) == 1
+%        classes(i) = "target";
+%     elseif isTarget(i) == 0
+%         classes(i) = "~target";
+%     else
+%         print("Error: element is not 'target' or 'not-target'.");
+%     end
+% end
 
 avgTarget = mean(~isnan(target),1);
 avgNotTarget = mean(~isnan(nonTarget),1);
@@ -67,9 +72,9 @@ for i = 1:rows
     for j = 1:cols
         if isnan(genes(i,j))
             %doReplace = (isnan(genes(i,:)));
-            if targetIndices(i) == 1
+            if isTarget(i) == 1
                 genes(i,j) = avgTarget(j);
-            elseif targetIndices(i) == 0
+            elseif isTarget(i) == 0
                 genes(i,j) = avgNotTarget(j);
             else
                 print("Error: element does not belong to target or not-target.");

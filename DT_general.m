@@ -7,13 +7,13 @@ area = 'Isocortex';
 %-------------------------------------------------------------------------------
 
 % Loads in th data, and sets up targets/nontargets for the chosen area:
-[genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans(area);
+[genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
 %-------------------------------------------------------------------------------
 % Parameters:
 numgenes = 4;
-samples = 100;
+samples = 1000;
 %-------------------------------------------------------------------------------
 
 % Initialize arrays

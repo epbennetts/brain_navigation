@@ -8,12 +8,13 @@
 % clear all;
 % close all force;
 % 
-% samples = 19114;
+% samples = 100;
 % area = "Isocortex";
-% prev_best_genes = [];%[1237];%, 7];%, 48];
+% %prev_best_genes = [];%[1237];%, 7];%, 48];   %this was before
+% prev_best_genes = [14779];% 14764];
 
 
-function [indexOrder, accuracies_ranked, geneNames_ranked, thresholds_all] = DT_classification_multiple(samples, area, prev_best_genes)
+function [indexOrder, f1_ranked, geneNames_ranked, thresholds_all] = DT_classification_multiple(samples, area, prev_best_genes)
 %Input:
 %numgenes: Number of genes to use in each DT
 %samples: number of "samples" to complete the algorithm on (can choose samples < cols for
@@ -40,9 +41,9 @@ numgenes = length(prev_best_genes) + 1;
 % isTarget
 % targetIndices = find(isTarget);
 % notTargetIndices = find(~isTarget);
-
-[genes, targetIndices, target, nonTarget, classes, geneNames] = filter_nans(area);
+[genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
+
 
 %num of trees we want to plot (not in order)
 %plotting = 1:10;
@@ -65,7 +66,14 @@ for i = 1:samples
     gene_combo = [prevGeneData genes(:,i)];
     
     %train
-    tree = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes);
+%     if strcmp(area, "Isocortex")        
+%         weights = zeros(rows, 1);
+%         weights(isTarget) = 0.5*rows/35;
+%         weights(~isTarget) = 0.5*rows/171;
+%         tree = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'Weights', weights);
+%     else    
+    tree = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'prior', 'uniform');
+%     end
     
     %check first predictor (should be best gene: x1)
     %doesn't exactly work as doesn't always show second split?
@@ -96,17 +104,19 @@ for i = 1:samples
     %targets
     
     % MAYBE CLEARER WITH BINARY FORMULATION:
-    % tp = sum(labels==1 & isTarget==1);
-    % fn = sum(labels==1 & isTarget==0);
+    tp = sum(labels==1 & isTarget==1);
+    fn = sum(labels==0 & isTarget==1);
+    fp = sum(labels==1 & isTarget==0);
+    tn = sum(labels==0 & isTarget==0);
     
-    % labels_t is the set of predictions for areas that are targets
-    labels_t = labels(targetIndices == 1);
-    tp = sum(strcmp(labels_t,'target')); % much faster if binary labels
-    fn = sum(strcmp(labels_t,'~target'));
-    %non-targets
-    labels_nt = labels(targetIndices == 0);
-    fp = sum(strcmp(labels_nt,'target'));
-    tn = sum(strcmp(labels_nt,'~target'));
+%     % labels_t is the set of predictions for areas that are targets
+%     labels_t = labels(isTarget == 1);
+%     tp = sum(strcmp(labels_t,'target')); % much faster if binary labels
+%     fn = sum(strcmp(labels_t,'~target'));
+%     %non-targets
+%     labels_nt = labels(isTarget == 0);
+%     fp = sum(strcmp(labels_nt,'target'));
+%     tn = sum(strcmp(labels_nt,'~target'));
     conf_matrices(i,:) = [tp, fp, fn, tn];
     
     %calc balanced accuracy
@@ -118,12 +128,26 @@ for i = 1:samples
     % if isnan(accuracy)
     %     accuracy = (0 + tn/(tn+fn))/2;
     % end
+    
+%    %view trees
+%     if i < 5
+%         view(tree,'Mode','graph')
+%     end
 end
 
 
 %sort accuracies
-accuracies(isnan(accuracies)) = -Inf;
-[accuracies_ranked, indexOrder] = sort(accuracies, 'descend');
+% accuracies(isnan(accuracies)) = -Inf;
+% [accuracies_ranked, indexOrder] = sort(accuracies, 'descend');
+%sort F1
+f1_score(isnan(f1_score)) = -Inf;
+[f1_ranked, indexOrder] = sort(f1_score, 'descend');
+
+
+%do the same for F1! (and then maybe use F1 as metric)
+%
+%
+%
 
 % indexOrder ~ [4,2,3,1]
 % X = [5,6,2,1]; X(indexOrder) => [1,6,2,5]
@@ -141,7 +165,7 @@ geneNames_ranked = geneNames(indexOrder);
 
 %plot the accuracies overall
 figure();
-histogram(accuracies_ranked);
+histogram(f1_ranked);
 title(sprintf('Accuracy for %g genes in %s', numgenes, area))
 xlabel('accuracy');
 ylabel('counts');
@@ -179,6 +203,10 @@ ylabel('counts');
 % end
 % 
 % %make various plots in a certain accuracy range
+% targetIndices = find(isTarget);
+% nonTargetIndices = find(~isTarget);
+% target = genes(isTarget, :);
+% nonTarget = genes(nonTargetIndices, :);
 % prevGeneData = genes(:, prev_best_genes);
 % for i = ordered_range
 %     
