@@ -58,20 +58,19 @@ for i = ordered_range
         legend({'target', '~target'});
         
     elseif (numgenes == 2)
-        plot(target(:,prev_best_genes),target(:,i), '.b');
-        title(sprintf('Genes %d and %d with accuracy %g', prev_best_genes, i, accuracies(i)));
-        hold on;
-        plot(nonTarget(:,prev_best_genes), nonTarget(:,i), '.r');
-        %disp("xline:");
-        %disp(i);
-        %disp(t1);
-        xline(t1, '--');
-        if ~isnan(thresholds_all(i,2))
-            yline(t2, '--');
-        end
-        hold off;
-        legend({'target', '~target'});
-    elseif numgenes == 3
-        %unsure
+        %for a = 1:rows
+            hold on;
+            plot(target(:,prev_best_genes),target(:,i), '.b');
+            title(sprintf('Genes %d and %d with accuracy %g', prev_best_genes, i, accuracies(i)));
+            plot(nonTarget(:,prev_best_genes), nonTarget(:,i), '.r');
+            %disp("xline:");
+            %disp(i);
+            %disp(t1);
+            xline(t1, '--');
+            if ~isnan(thresholds_all(i,2))
+                yline(t2, '--');
+            end
+            legend({'target', '~target'});
+        %end
     end    
 end

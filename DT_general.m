@@ -13,7 +13,7 @@ area = 'Isocortex';
 %-------------------------------------------------------------------------------
 % Parameters:
 numgenes = 4;
-samples = 1000;
+samples = cols;
 %-------------------------------------------------------------------------------
 
 % Initialize arrays
@@ -23,6 +23,7 @@ best_gene_names = strings(numgenes,1);
 
 % Loop through one gene at a time
 for n = 1:numgenes
+    disp(n)
     [indexOrder, accuracies_ranked, genenames_ranked, thresholds_all] = ...
                     DT_classification_multiple(samples, area, best_genes(1:n-1));
     best_genes(n) = indexOrder(1);
@@ -38,7 +39,7 @@ plot(numgenes_array, top_accuracy,'.-b');
 title(sprintf('Accuracy vs # genes in %s', area));
 xlabel('Num genes used in DTs')
 ylabel('Accuracy')
-set(gca,'xtick',0:numgenes)
+set(gca,'xtick', 0:numgenes)
 grid on;
 
 
@@ -46,4 +47,4 @@ grid on;
 numplots = 5;
 range = 'top';
 %work on this function
-%DT_plot_multiple(genes, geneNames, target, nonTarget, thresholds_all, samples, indexOrder, numplots, range)
+%DT_plot_multiple(genes, geneNames, numgenes, best_genes, isTarget, thresholds_all, samples, indexOrder, numplots, range)
