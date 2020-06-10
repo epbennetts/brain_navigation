@@ -17,7 +17,8 @@
 % %prev_best_genes = [4307, 636, 148]; %for noise
 % prev_best_genes = [];
 
-function [indexOrder, prec_ranked, geneNames_ranked, thresholds_all] = DT_classification_multiple(samples, area, prev_best_genes)
+
+function [indexOrder, bal_acc_ranked, geneNames_ranked, thresholds_all] = DT_classification_multiple(samples, area, prev_best_genes)
 %Input:
 %numgenes: Number of genes to use in each DT
 %samples: number of "samples" to complete the algorithm on (can choose samples < cols for
@@ -56,16 +57,17 @@ numgenes = length(prev_best_genes) + 1;
 %plotting = [];
 
 %set vars and empty arrays
-accuracies = zeros(samples,1);
+bal_accuracies = zeros(samples,1);
 f1_score = zeros(samples,1);
-prec = zeros(samples,1);
+precision = zeros(samples,1);
 conf_matrices = zeros(samples,4);
 thresholds_all = NaN(samples, numgenes);
 %genes_used = cell(samples, 2);
 
 %make set of noisy data
-%this will be noise of max ~0.5 st. dev. (because data is z-scored) 
-noise = (rand(size(genes)) - 0.5); 
+%this will be noise of max ~scale st. deviations (because data is z-scored) 
+scale = 1;
+noise = scale*(rand(size(genes)) - 0.5); 
 genes_noisy = genes + noise;
 
 % Previously selected genes as baseline:
@@ -86,7 +88,8 @@ for i = 1:samples
     
     %train 
     tree_ideal = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
-    tree_CV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
+    %tree_CV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
+    tree_CV_noise = fitctree(gene_combo_noisy, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
     
     %check first predictor (should be best gene: x1)
     %doesn't exactly work as doesn't always show second split?
@@ -107,7 +110,7 @@ for i = 1:samples
     %labels_noisy = predict(tree_ideal, gene_combo_noisy);   %how well does the ideal tree do with noisy data?
     
     %test CV
-    [labels_CV, score_CV, cost_CV] = kfoldPredict(tree_CV);
+    [labels_CV, score_CV, cost_CV] = kfoldPredict(tree_CV_noise);
     
     
     %conf matrices -- 
@@ -119,30 +122,35 @@ for i = 1:samples
     conf_matrices(i,:) = [tp, fp, fn, tn];
     
     %calc balanced accuracy
-    accuracies(i) = (tp/(tp+fp) + tn/(tn+fn))/2;
-    pr = tp/(tp+fp);
-    recall = tp/(tp+fn);
-    %f1_score(i) = 2*pr*recall/(pr+recall)*100;
+    bal_acc = (tp/(tp+fp) + tn/(tn+fn))/2;
     %if there are no predicted targets this will give nan, so:
-    % if isnan(accuracy)
-    %     accuracy = (0 + tn/(tn+fn))/2;
-    % end
-    prec(i) = pr;
+    if isnan(bal_acc)
+        %accuracy = (0 + tn/(tn+fn))/2;
+        bal_acc = 0;
+    end
+    bal_accuracies(i) = bal_acc;
+    
+    %f1 score
+    prec = tp/(tp+fp);
+    recall = tp/(tp+fn);
+    f1_score(i) = 2*prec*recall/(prec+recall)*100;
+    precision(i) = prec;
     
 end
 
 %sort accuracies
-% accuracies(isnan(accuracies)) = -Inf;
-% [accuracies_ranked, indexOrder] = sort(accuracies, 'descend');
+bal_accuracies(isnan(bal_accuracies)) = -Inf;
+[bal_acc_ranked, indexOrder] = sort(bal_accuracies, 'descend');
+
 %sort F1
 % f1_score(isnan(f1_score)) = -Inf;
 % [f1_ranked, indexOrder] = sort(f1_score, 'descend');
 % conf_matrices_sorted = conf_matrices(indexOrder, :);
 
-%sort precision
-prec(isnan(prec)) = -Inf;
-[prec_ranked, indexOrder] = sort(prec, 'descend');
-conf_matrices_sorted = conf_matrices(indexOrder, :);
+% %sort precision
+% precision(isnan(precision)) = -Inf;
+% [prec_ranked, indexOrder] = sort(precision, 'descend');
+% conf_matrices_sorted = conf_matrices(indexOrder, :);
 
 
 % indexOrder ~ [4,2,3,1]
@@ -161,10 +169,10 @@ geneNames_ranked = geneNames(indexOrder);
 
 %plot the accuracies overall
 figure();
-histogram(prec_ranked, 'Normalization', 'count', 'NumBins', 10);
-title(sprintf('Accuracy for %g genes in %s', numgenes, area))
-xlabel('accuracy');
-ylabel('counts');
+histogram(bal_acc_ranked, 'Normalization', 'count', 'NumBins', 10);
+title(sprintf('Balanced Accuracy for %g genes in %s', numgenes, area))
+xlabel('Balanced accuracy');
+ylabel('Counts');
 
 
 %%***#1 best gene ***
@@ -224,7 +232,7 @@ for i = ordered_range
     figure;    
     if (numgenes == 1)
         histogram(target(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
-        title(sprintf('%s : Gene %d with accuracy %g', geneNames{i}, i, prec(i)));
+        title(sprintf('%s : Gene %d with accuracy %g', geneNames{i}, i, precision(i)));
         if strcmp(geneNames_ranked(i), geneNames(indexOrder(i)))
             sprintf("Error: geneNames_ranked(i) is %s and geneNames(indexOrder(i) is %s.", geneNames_ranked{i}, geneNames{indexOrder(i)});
         end
@@ -253,7 +261,7 @@ for i = ordered_range
         x_err = noise(:,prev_best_genes);
         y = genes(:,i);
         y_err = noise(:,i);
-        %errorbar(x, y, y_err, y_err, x_err, x_err, 'o')
+        errorbar(x, y, y_err, y_err, x_err, x_err, 'o')
         
         %disp("xline:");
         %disp(i);

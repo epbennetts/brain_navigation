@@ -1,4 +1,4 @@
-close all force;
+%close all force;
 %clear all;
 
 %-------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ samples = cols;
 prev_best_genes = [4307, 636, 148];
 prevGeneData = genes(:, prev_best_genes);
 %gene index I want to examine:
-i = 42;
+i = 123;
 gene_combo = [prevGeneData genes(:,i)];
 
 %train

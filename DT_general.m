@@ -6,7 +6,7 @@ clear all;
 area = 'Isocortex';
 %-------------------------------------------------------------------------------
 
-% Loads in th data, and sets up targets/nontargets for the chosen area:
+% Loads in the data, and sets up targets/nontargets for the chosen area:
 [genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
