@@ -52,68 +52,86 @@ conf_matrices = zeros(samples,4);
 thresholds_all = NaN(samples, numgenes);
 %genes_used = cell(samples, 2);
 
-%make set of noisy data
-%this will be noise of max ~scale st. deviations (because data is z-scored) 
-scale = 1;
-noise = scale*(rand(size(genes)) - 0.5); 
-genes_noisy = genes + noise;
-
-% Previously selected genes as baseline:
-prevGeneData = genes(:, prev_best_genes);
-prevGeneDataNoisy = genes_noisy(:, prev_best_genes);
-
 %loop, make trees, classify and evaluate
 for i = 1:samples
     
-    % Set gene data for this iteration:
-    gene_combo = [prevGeneData genes(:,i)];
-    gene_combo_noisy = [prevGeneDataNoisy genes_noisy(:,i)];
-    
-    %set cost function
-    %matrix order is set by 'ClassNames'
-    cost = size(isTarget(isTarget == 0), 1)/size(isTarget(isTarget == 1), 1);
-    cost_f = [0, 1; cost, 0];
-    
-    %train 
-    tree_ideal = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
-    %tree_CV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
-    tree_CV_noise = fitctree(gene_combo_noisy, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
-    
-    % Store all thresholds for later:
-    %with CV: save 10 thresholds, then average?
-    thresholds_raw = tree_ideal.CutPoint; %threshold with NaNs
-    thresholds = thresholds_raw(~isnan(thresholds_raw));
-    threshold_pan = nan(1,numgenes);
-    threshold_pan(1:length(thresholds)) = thresholds;
-    thresholds_all(i,:) = threshold_pan;
-    genes_used = tree_ideal.CutPredictor;   
- 
-    %test CV
-%     %labels_ideal = predict(tree_ideal, gene_combo); 
-%     %labels_noisy = predict(tree_ideal, gene_combo_noisy);   %how well does the ideal tree do with noisy data?
-    [labels_CV, score_CV, cost_CV] = kfoldPredict(tree_CV_noise);
-    
-    %conf matrices -- 
-    tp = sum(labels_CV==1 & isTarget==1);
-    fn = sum(labels_CV==0 & isTarget==1);
-    fp = sum(labels_CV==1 & isTarget==0);
-    tn = sum(labels_CV==0 & isTarget==0);    
-    conf_matrices(i,:) = [tp, fp, fn, tn];
-    
-    %calc balanced accuracy
-    bal_acc = (tp/(tp+fp) + tn/(tn+fn))/2;
-    %if there are no predicted targets this will give nan, so:
-    if tp == 0
-        %accuracy = (0 + tn/(tn+fn))/2;
-        bal_acc = 0;
+    for iter = 1
+        
+        %generate noisy data
+        %this will be noise of max ~scale st. deviations (because data is z-scored)
+        scale = 1;
+        %noise = scale*(rand(size(genes)) - 0.5);
+        noise = zeros(size(genes));
+        genes_noisy = genes + noise;
+        
+        % Previously selected genes:
+        prevGeneData = genes(:, prev_best_genes);
+        prevGeneDataNoisy = genes_noisy(:, prev_best_genes);
+        
+        % Set gene data for this iteration:
+        gene_combo = [prevGeneData genes(:,i)];
+        gene_combo_noisy = [prevGeneDataNoisy genes_noisy(:,i)];
+        
+        %set cost function
+        %matrix order is set by 'ClassNames'
+        cost = size(isTarget(isTarget == 0), 1)/size(isTarget(isTarget == 1), 1);
+        cost_f = [0, 1; cost, 0];
+        
+        %train
+        tree_clean_noCV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
+        %tree_CV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
+        tree_CV_noise = fitctree(gene_combo_noisy, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
+        
+        % Store all thresholds for later:
+        %"IDEAL" thresholds (from clean, no-CV tree)
+        thresholds_raw = tree_clean_noCV.CutPoint; %threshold with NaNs
+        thresholds = thresholds_raw(~isnan(thresholds_raw));
+        threshold_pan = nan(1,numgenes);
+        threshold_pan(1:length(thresholds)) = thresholds;
+        thresholds_all(i,:) = threshold_pan;
+        
+        k =10;
+        thresholds_folds_CV = NaN(samples, numgenes, k);
+        for fold = 1:k
+            %CV thresholds
+            tree_k = tree_CV_noise.Trained{i};
+            thresholds_raw_CV = tree_k.CutPoint; %threshold with NaNs
+            thresholds_CV = thresholds_raw_CV(~isnan(thresholds_raw_CV));
+            threshold_pan_CV = nan(1,numgenes);
+            threshold_pan_CV(1:length(thresholds_CV)) = thresholds_CV;
+            thresholds_folds_CV(i,:,fold) = threshold_pan_CV;
+        end
+        %average thresholds from the different folds
+        thresholds_all_CV = mean(thresholds_folds_CV,3);
+                
+        %test CV
+        %     %labels_ideal = predict(tree_ideal, gene_combo);
+        %     %labels_noisy = predict(tree_ideal, gene_combo_noisy);   %how well does the ideal tree do with noisy data?
+        [labels_CV_noise, score_CV_n, cost_CV_n] = kfoldPredict(tree_CV_noise);
+        
+        %conf matrices --
+        tp = sum(labels_CV_noise==1 & isTarget==1);
+        fn = sum(labels_CV_noise==0 & isTarget==1);
+        fp = sum(labels_CV_noise==1 & isTarget==0);
+        tn = sum(labels_CV_noise==0 & isTarget==0);
+        conf_matrices(i,:) = [tp, fp, fn, tn];
+        
+        %calc balanced accuracy
+        bal_acc = (tp/(tp+fp) + tn/(tn+fn))/2;
+        %if there are no predicted targets this will give nan, so:
+        if tp == 0
+            %accuracy = (0 + tn/(tn+fn))/2;
+            bal_acc = 0;
+        end
+        bal_accuracies(i) = bal_acc;
+        
+        %f1 score
+        prec = tp/(tp+fp);
+        recall = tp/(tp+fn);
+        %f1_score(i) = 2*prec*recall/(prec+recall)*100;
+        %precision(i) = prec;
+        
     end
-    bal_accuracies(i) = bal_acc;
-    
-    %f1 score
-    prec = tp/(tp+fp);
-    recall = tp/(tp+fn);
-    %f1_score(i) = 2*prec*recall/(prec+recall)*100;
-    %precision(i) = prec;
     
 end
 
@@ -200,16 +218,16 @@ for i = ordered_range
     cost_f = [0, 1; cost, 0];
     
     %train 
-    tree_ideal = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
+    tree_clean_noCV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
     
     %rename threshold
     t1 = thresholds_all(i,1);
     
     %predictor order
-    genes_used = tree_ideal.CutPredictor; 
+    genes_used = tree_clean_noCV.CutPredictor; 
     
     %view trees, plotsview, etc.
-    view(tree_ideal,'Mode','graph')
+    view(tree_clean_noCV,'Mode','graph')
     figure;    
     if (numgenes == 1)
         histogram(target(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
@@ -227,7 +245,7 @@ for i = ordered_range
         
     elseif (numgenes == 2)
         hold on;
-        for ro = 1:rows
+        for a = 1:rows
             colour = rgbconv(structInfo{a,2}{1});
             
 %             %do this but with colours
