@@ -9,10 +9,10 @@
 close all force;
 
 cols = 19114;
-samples = 10;
+samples = 7;
 area = "Isocortex";
 %prev_best_genes = [4307, 636, 148]; %for noise
-prev_best_genes = [17];
+prev_best_genes = [];
 
 
 %function [indexOrder, bal_acc_ranked, geneNames_ranked, thresholds_all] = DT_classification_multiple(samples, area, prev_best_genes)
@@ -49,19 +49,24 @@ bal_accuracies = zeros(samples,1);
 f1_score = zeros(samples,1);
 precision = zeros(samples,1);
 conf_matrices = zeros(samples,4);
-thresholds_all = NaN(samples, numgenes);
+thresholds_all_clean = NaN(samples, numgenes);
+thresholds_all_CV_noise = NaN(samples, numgenes);
 %genes_used = cell(samples, 2);
 
 %loop, make trees, classify and evaluate
 for i = 1:samples
     
-    for iter = 1
+    iters = 20;
+    conf_matrices_iter = zeros(iters,4);
+    thresholds_CV_iter = NaN(iters,numgenes);
+    
+    for iter = 1:iters
         
         %generate noisy data
         %this will be noise of max ~scale st. deviations (because data is z-scored)
         scale = 1;
-        %noise = scale*(rand(size(genes)) - 0.5);
-        noise = zeros(size(genes));
+        %noise = zeros(size(genes));
+        noise = scale*(rand(size(genes)) - 0.5);
         genes_noisy = genes + noise;
         
         % Previously selected genes:
@@ -78,32 +83,33 @@ for i = 1:samples
         cost_f = [0, 1; cost, 0];
         
         %train
-        tree_clean_noCV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
+        tree_clean = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
         %tree_CV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
         tree_CV_noise = fitctree(gene_combo_noisy, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
         
         % Store all thresholds for later:
         %"IDEAL" thresholds (from clean, no-CV tree)
-        thresholds_raw = tree_clean_noCV.CutPoint; %threshold with NaNs
+        thresholds_raw = tree_clean.CutPoint; %threshold with NaNs
         thresholds = thresholds_raw(~isnan(thresholds_raw));
         threshold_pan = nan(1,numgenes);
         threshold_pan(1:length(thresholds)) = thresholds;
-        thresholds_all(i,:) = threshold_pan;
+        thresholds_all_clean(i,:) = threshold_pan;
         
         k =10;
-        thresholds_folds_CV = NaN(samples, numgenes, k);
+        thresholds_CV_folds = NaN(k,numgenes);
         for fold = 1:k
             %CV thresholds
-            tree_k = tree_CV_noise.Trained{i};
+            tree_k = tree_CV_noise.Trained{k};
             thresholds_raw_CV = tree_k.CutPoint; %threshold with NaNs
             thresholds_CV = thresholds_raw_CV(~isnan(thresholds_raw_CV));
             threshold_pan_CV = nan(1,numgenes);
             threshold_pan_CV(1:length(thresholds_CV)) = thresholds_CV;
-            thresholds_folds_CV(i,:,fold) = threshold_pan_CV;
+            thresholds_CV_folds(fold,:) = threshold_pan_CV;
         end
         %average thresholds from the different folds
-        thresholds_all_CV = mean(thresholds_folds_CV,3);
-                
+        thresholds_CV = nanmean(thresholds_CV_folds,1);
+        thresholds_CV_iter(iter,:) = thresholds_CV;
+        
         %test CV
         %     %labels_ideal = predict(tree_ideal, gene_combo);
         %     %labels_noisy = predict(tree_ideal, gene_combo_noisy);   %how well does the ideal tree do with noisy data?
@@ -114,24 +120,41 @@ for i = 1:samples
         fn = sum(labels_CV_noise==0 & isTarget==1);
         fp = sum(labels_CV_noise==1 & isTarget==0);
         tn = sum(labels_CV_noise==0 & isTarget==0);
-        conf_matrices(i,:) = [tp, fp, fn, tn];
+        conf_matrices_iter(iter,:) = [tp, fp, fn, tn];
         
-        %calc balanced accuracy
-        bal_acc = (tp/(tp+fp) + tn/(tn+fn))/2;
-        %if there are no predicted targets this will give nan, so:
-        if tp == 0
-            %accuracy = (0 + tn/(tn+fn))/2;
-            bal_acc = 0;
-        end
-        bal_accuracies(i) = bal_acc;
         
-        %f1 score
-        prec = tp/(tp+fp);
-        recall = tp/(tp+fn);
-        %f1_score(i) = 2*prec*recall/(prec+recall)*100;
-        %precision(i) = prec;
+        
+%         %f1 score
+%         prec = tp/(tp+fp);
+%         recall = tp/(tp+fn);
+%         f1_score(i) = 2*prec*recall/(prec+recall)*100;
+%         %precision
+%         precision(i) = prec;
         
     end
+    
+    %thresholds
+    thresholds_CV_noise = nanmean(thresholds_CV_iter,1);
+    thresholds_all_CV_noise(i,:) = thresholds_CV_noise;
+    %conf matrices
+    conf_matrix = mean(conf_matrices_iter, 1);
+    conf_matrices(i,:) = conf_matrix;
+    
+    %detangle confusion matrix
+    tp = conf_matrix(1);
+    fp = conf_matrix(2);
+    fn = conf_matrix(3);
+    tn = conf_matrix(4);
+    
+    %calc balanced accuracy
+    bal_acc = (tp/(tp+fp) + tn/(tn+fn))/2;
+    %if there are no predicted targets this will give nan
+    %we also want to discard genes with 0 correct target predictions, so:
+    if tp == 0 || (tp+fp) == 0
+        %accuracy = (0 + tn/(tn+fn))/2;
+        bal_acc = 0;
+    end    
+    bal_accuracies(i) = bal_acc;
     
 end
 
@@ -149,20 +172,7 @@ bal_accuracies(isnan(bal_accuracies)) = -Inf;
 % [prec_ranked, indexOrder] = sort(precision, 'descend');
 % conf_matrices_sorted = conf_matrices(indexOrder, :);
 
-
-% indexOrder ~ [4,2,3,1]
-% X = [5,6,2,1]; X(indexOrder) => [1,6,2,5]
-
 geneNames_ranked = geneNames(indexOrder);
-
-% %all genes ranked
-% geneNames_ranked = strings(samples,1);
-% for i = 1:size(indexOrder,1)
-%     geneIndex = indexOrder(i);
-%     genesStr = string(geneNames(geneIndex));
-%     geneNames_ranked(i) = genesStr;
-% end
-
 
 %plot the accuracies overall
 figure();
@@ -217,18 +227,19 @@ for i = ordered_range
     cost = size(isTarget(isTarget == 0), 1)/size(isTarget(isTarget == 1), 1);
     cost_f = [0, 1; cost, 0];
     
-    %train 
-    tree_clean_noCV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
+    %train
+    tree_clean = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
     
     %rename threshold
-    t1 = thresholds_all(i,1);
+    t1 = thresholds_all_CV_noise(i,1);
     
     %predictor order
-    genes_used = tree_clean_noCV.CutPredictor; 
+    genes_used = tree_clean.CutPredictor;
+    %problem: these don't correspond to the average thresholds necessarily
     
     %view trees, plotsview, etc.
-    view(tree_clean_noCV,'Mode','graph')
-    figure;    
+    view(tree_clean,'Mode','graph')
+    figure;
     if (numgenes == 1)
         histogram(target(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
         title(sprintf('%s : Gene %d with accuracy %g', geneNames{i}, i, bal_accuracies(i)));
@@ -239,7 +250,7 @@ for i = ordered_range
         histogram(nonTarget(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
         if ~isnan(t1)
             xline(t1, '--r');
-        end        
+        end
         hold off;
         legend({'target', '~target'});
         
@@ -248,15 +259,15 @@ for i = ordered_range
         for a = 1:rows
             colour = rgbconv(structInfo{a,2}{1});
             
-%             %do this but with colours
-%             x = genes(:,prev_best_genes);
-%             x_err = noise(:,prev_best_genes);
-%             y = genes(:,i);
-%             y_err = noise(:,i);
-%             errorbar(x, y, y_err, y_err, x_err, x_err, 'o')
-%             
+            %             %do this but with colours
+            %             x = genes(:,prev_best_genes);
+            %             x_err = noise(:,prev_best_genes);
+            %             y = genes(:,i);
+            %             y_err = noise(:,i);
+            %             errorbar(x, y, y_err, y_err, x_err, x_err, 'o')
+            %
             
-            if isTarget(a)                
+            if isTarget(a)
                 x = genes(a,prev_best_genes);
                 y = genes(a,i);
                 x_err = noise(a,prev_best_genes);
@@ -271,11 +282,11 @@ for i = ordered_range
             end
             
             
-%             if isTarget(a)
-%                 plot(genes(a,prev_best_genes), genes(a,i), '*', 'color', colour);
-%             else
-%                 plot(genes(a,prev_best_genes), genes(a,i), '.', 'color', colour);
-%             end
+            %             if isTarget(a)
+            %                 plot(genes(a,prev_best_genes), genes(a,i), '*', 'color', colour);
+            %             else
+            %                 plot(genes(a,prev_best_genes), genes(a,i), '.', 'color', colour);
+            %             end
         end
         xlim([min(genes(:,prev_best_genes)) - 0.1, max(genes(:,prev_best_genes)) + 0.1])
         ylim([min(genes(:,i)) - 0.1, max(genes(:,i)) + 0.1])
@@ -283,24 +294,24 @@ for i = ordered_range
         %plot thresholds
         if strcmp(genes_used{1,1}, 'x1')
             xline(t1, '--');
-            if ~isnan(thresholds_all(i,2))
-                t2 = thresholds_all(i,2);
+            if ~isnan(thresholds_all_CV_noise(i,2))
+                t2 = thresholds_all_CV_noise(i,2);
                 %this assumes that if numgenes = 2, prevGeneData is just 1 gene
                 line([t1,max(prevGeneData)], [t2,t2], 'LineStyle', '--', 'Color', 'k')
                 
             end
         elseif strcmp (genes_used{1,1}, 'x2')
             yline(t1, '--');
-            if ~isnan(thresholds_all(i,2))
-                t2 = thresholds_all(i,2);
+            if ~isnan(thresholds_all_CV_noise(i,2))
+                t2 = thresholds_all_CV_noise(i,2);
                 %this assumes that if numgenes = 2, prevGeneData is just 1 gene
-                line([t2,t2],[t1, max(prevGeneData)], 'LineStyle', '--', 'Color', 'k')                
+                line([t2,t2],[t1, max(prevGeneData)], 'LineStyle', '--', 'Color', 'k')
             end
         end
         hold off;
         title(sprintf('Genes %d and %d with accuracy %g', prev_best_genes, i, bal_accuracies(i)));
         %legend({'target', 'threshold', '~target'});
-       
-    end    
+        
     end
+end
 
