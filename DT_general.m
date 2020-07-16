@@ -6,14 +6,14 @@ clear all;
 area = 'Isocortex';
 %-------------------------------------------------------------------------------
 
-% Loads in the data, and sets up targets/nontargets for the chosen area:
-[genes, isTarget, geneNames, structInfo] = filter_nans(area);
+% Loads in th data, and sets up targets/nontargets for the chosen area:
+[genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
 %-------------------------------------------------------------------------------
 % Parameters:
 numgenes = 3;
-samples = 10;
+samples = cols;
 %-------------------------------------------------------------------------------
 
 % Initialize arrays
@@ -47,5 +47,4 @@ grid on;
 numplots = 5;
 range = 'top';
 %work on this function
-DT_plot_multiple(genes, geneNames, numgenes, best_genes, isTarget, thresholds_all, samples, indexOrder, numplots, range)
-                 genes, geneNames, target, nonTarget,              thresholds_all, samples, indexOrder, numplots, range
+%DT_plot_multiple(genes, geneNames, numgenes, best_genes, isTarget, thresholds_all, samples, indexOrder, numplots, range)
