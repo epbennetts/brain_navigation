@@ -16,7 +16,7 @@ if tp == 0 || (tp+fp) == 0
     %accuracy = (0 + tn/(tn+fn))/2;
     balAcc = 0;
 else
-    balAcc = (tp/(tp+fp) + tn/(tn+fn))/2;
+    balAcc = (tp/(tp+fn) + tn/(tn+fp))/2;
 end
 
 

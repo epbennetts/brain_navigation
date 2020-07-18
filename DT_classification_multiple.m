@@ -1,238 +1,104 @@
-%TO DO
-%later: have clean genes matrix saved somewhere (instead of processing every time)
-%generalise to a function that uses n num of genes and just goes through
-%everything without plotting
-%generalise further to any area
+% %dummy params
+% clear all;
+% close all force;
+% params = SetDefaultParams();
+% 
+% cols = 19114;
+% samples = 20;
+% area = "Isocortex";
+% %prev_best_genes = [4307, 636, 148]; %for noise
+% prevBestGenes = [3725];
+% noiseStDev = 1;
 
 
-%clear all;
-close all force;
-
-params = SetDefaultParameters();
-
-cols = 19114;
-samples = 20;
-area = "Isocortex";
-%prev_best_genes = [4307, 636, 148]; %for noise
-prev_best_genes = [];
+function [indexOrder, bal_acc_ranked, geneNames_ranked, trees_all_clean] = DT_classification_multiple(samples, area, prevBestGenes, noiseStDev)
+%Finds the gene within the sample that performs best at classifying the target areas with a DT, in combination with prev_best_genes.
+%Ranks genes according to performance (balanced accuracy).
+%Will also plot a histogram of the accuracies
+%
+%INPUTS:
+%samples: size of the gene subset to complete the algorithm on (can choose samples < total #genes for testing)
+%prev_best_genes: indices of the best genes obtained from previous iterations. 
 
 
-%function [indexOrder, bal_acc_ranked, geneNames_ranked, thresholds_all] = DT_classification_multiple(samples, area, prev_best_genes)
-%Input:
-%numgenes: Number of genes to use in each DT
-%samples: number of "samples" to complete the algorithm on (can choose samples < cols for
-%testing)
-%prev_best_genes: array of the indices of the best genes for each
-%iteration of increasing numgenes. i.e. for numgenes = 1, don't need
-%anything, for numgenes = 2, need indexOrder(1) of the previous iteration,
-%for numgenes = 3, need array of size 2 with the 2 prev ones, etc.
-%ideally this would eventually be done recursively within the function
-%rather than manually outside
-%Function:
-%The function will train a tree with those genes and test it
-%against the real classes. Will also plot the accuracies histogram
-%Returns:
-%indexOrder: gene index sorted by decreasing accuracy
-%accuracies_ranked: Accuracies from highest to lowest
-%geneNames_ranked: Gene names ordered by highest to lowest accuracy
-%thresholds_all: DT thresholds for every tree
-
-numgenes = length(prev_best_genes) + 1;
-
+%SET VARS
+numgenes = length(prevBestGenes) + 1;
 [genes, isTarget, geneNames, structInfo] = filter_nans(area);
+%rows == #areas,  cols = #genes in the data
 [rows, cols] = size(genes);
 classes = isTarget;
+%empty arrays
+balAccuracies = zeros(samples,1);
+confMatrices = zeros(samples,4);
+thresholds_all_clean = nan(samples, numgenes);
+trees_all_clean = cell(samples,1);
 
-%num of trees we want to plot (not in order)
-%plotting = 1:10;
-
-%set vars and empty arrays
-bal_accuracies = zeros(samples,1);
-f1_score = zeros(samples,1);
-precision = zeros(samples,1);
-conf_matrices = zeros(samples,4);
-thresholds_all_clean = NaN(samples, numgenes);
-thresholds_all_CV_noise = NaN(samples, numgenes);
-%genes_used = cell(samples, 2);
-
-%loop, make trees, classify and evaluate
-% sample == gene
+%loop over genes or subset, classify and evaluate metrics
+% samples == num genes
 for i = 1:samples
-
-    iters = 1;
-    conf_matrices_iter = nan(iters,4);
-    balAccuracies_iter = nan(iters,1);
-    thresholds_CV_iter = nan(iters,numgenes);
-
-    for iter = 1:iters
-
-        %generate noisy data
-        %this will be noise of max ~scale st. deviations (because data is z-scored)
-        scale = 1;%
-        noise = zeros(size(genes));%
-        %noise = scale*(rand(size(genes)) - 0.5);
-        genes_noisy = genes + noise;%
-
+    
+    numNoiseIterations = 15;
+    confMatrices_iter = nan(numNoiseIterations,4);
+    balAccuracies_iter = nan(numNoiseIterations,1);
+    
+    for iter = 1:numNoiseIterations
+        
+        %SELECT GENE DATA
         % Previously selected genes:
-        prevGeneData = genes(:, prev_best_genes);
-        prevGeneDataNoisy = genes_noisy(:, prev_best_genes);%
-
+        prevGeneData = genes(:, prevBestGenes);
         % Set gene data for this iteration:
         gene_combo = [prevGeneData genes(:,i)];
-        gene_combo_noisy = [prevGeneDataNoisy genes_noisy(:,i)];%
-
+        
+        %MAKE FOLDS
         %set cost function
-        %matrix order is set by 'ClassNames'
-        cost = size(isTarget(isTarget == 0), 1)/size(isTarget(isTarget == 1), 1);
-        cost_f = [0, 1; cost, 0];
-
+        costFunc = ComputeBalancedCostFunc(isTarget);        
         %make stratified CV folds
         numFolds = 10;
         partition = cvpartition(classes,'KFold',numFolds,'Stratify',true);
-
+                
         % TRAINING AND TESTING
-        % rows = numAreas
-        classPredictions = NaN(rows,1);
-        for k = 1:numFolds
-            % Separate out training and testing portions for this fold
-            trainIndices = training(partition, k);
-            testIndices = test(partition, k);
-            % testIndices_all(:,k) = testIndices;
-            geneDataTrain = gene_combo_mod(trainIndices,:);
-            geneDataTest = gene_combo_mod(testIndices,:);
-            classLabelsTrain = classes(trainIndices);
-            classLabelsTest = classes(testIndices);
-
-            % Get the training bits and train the model
-            treeModelTrain = fitctree(geneDataTrain, classLabelsTrain, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
-
-            % Add noise to test gene-expression data
-            scale = 1;
-            geneDataTestNoisy = geneDataTest + scale*(randn(size(geneDataTest)));
-
-            % Store predictions from the trained model on the noisy test data
-            classPredictions(testIndices) = predict(treeModelTrain, geneDataTestNoisy);
-
-            %select the one which used noisy data as the test data
-            %(the kth tree uses the kth fold as the test fold)
-            % tree_select = tree_CV_mod.Trained{k};
-            % tree_models{k} = tree_select;
-        end
-        % Across the folds, predicted labels are filled into classPredictions
-        % real labels in classes:
-        [conf_matrices_iter(iter,:),balAccuracies_iter(iter)] = ComputeConfusion(classes,classPredictions);
-
-
-        % %train CV tree with clean data
-        % tree_CV = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
-        % %tree_CV_noise = fitctree(gene_combo_noisy, classes, 'MaxNumSplits', numgenes, 'CrossVal','on', 'cost', cost_f, 'ClassNames', [1,0]);
-
-        %-------------------------------------------------------------------------------
-        % COMPUTE THRESHOLDS FROM CLEAN DATA
-        %-------------------------------------------------------------------------------
-        %"IDEAL" thresholds (from clean, no-CV tree)
-        % Store them all thresholds for later:
-        % %train ideal tree (no CV or noise)
-        tree_ideal = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
-        thresholds_raw = tree_ideal.CutPoint; %threshold with NaNs
-        thresholds = thresholds_raw(~isnan(thresholds_raw));
-        threshold_pan = nan(1,numgenes);
-        threshold_pan(1:length(thresholds)) = thresholds;
-        thresholds_all_clean(i,:) = threshold_pan;
-        %-------------------------------------------------------------------------------
-
-%         %CV average thresholds
-%         k2 =10;
-%         thresholds_CV_folds = NaN(k2,numgenes);
-%         for fold2 = 1:k2
-%             tree_k = tree_CV_noise.Trained{k2};
-%             thresholds_raw_CV = tree_k.CutPoint; %threshold with NaNs
-%             thresholds_CV = thresholds_raw_CV(~isnan(thresholds_raw_CV));
-%             threshold_pan_CV = nan(1,numgenes);
-%             threshold_pan_CV(1:length(thresholds_CV)) = thresholds_CV;
-%             thresholds_CV_folds(fold2,:) = threshold_pan_CV;
-%         end
-%         %average thresholds from the different folds
-%         thresholds_CV = nanmean(thresholds_CV_folds,1);
-%         thresholds_CV_iter(iter,:) = thresholds_CV;
-
-        %TESTING
-        %ideal case (no CV, no noise)
-        % labels_ideal = predict(tree_ideal, gene_combo);
-%         %CV only case:
-%         [labels_CV, score_CV, cost_CV] = kfoldPredict(tree_CV);
-%         %noise only case:
-%         labels_noisy = predict(tree_ideal, gene_combo_noisy);   %how well does the ideal tree do with noisy data? (no CV)
-
-
-        % %TESTING desired case: CV + modified noise (i.e. in testing only)
-        % labels_CV_mod = NaN(rows,1);
-        % for row = 1:rows
-        %     %check what fold uses this data point in the test set
-        %     k = find(testIndices_all(row,:));
-        %     %the kth tree didn't use this data point in training
-        %     tree_k = tree_models{k};
-        %     %make noisy test data point
-        %     scale = 1;
-        %     gene_combo_point = gene_combo(row,:) + scale*(randn());
-        %     %predict label using tree k
-        %     label = predict(tree_k, gene_combo_point);
-        %     labels_CV_mod(row,1) = label;
-        % end
-
-%         %f1 score
-%         prec = tp/(tp+fp);
-%         recall = tp/(tp+fn);
-%         f1_score(i) = 2*prec*recall/(prec+recall)*100;
-%         %precision
-%         precision(i) = prec;
-
+        %Iterating through CV folds, random noise in testing 
+        [predictedLabels] = kFoldPredictNoisy(gene_combo, rows, classes, numgenes, noiseStDev, costFunc, partition, numFolds);
+        
+        % Across the folds, predicted class labels are filled into predictedLabels
+        % classes == real labels
+        [confMatrices_iter(iter,:), balAccuracies_iter(iter)] = ComputeConfusion(classes,predictedLabels);
+     
     end
-
-    %thresholds
-    % thresholds_CV_noise = nanmean(thresholds_CV_iter,1);
-    % thresholds_all_CV_noise(i,:) = thresholds_CV_noise;
-
+    
+    % COMPUTE AND SAVE IDEAL TREES (no CV or noise)
+    tree_clean = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', costFunc, 'ClassNames', [1,0]);
+    trees_all_clean{i,1} = tree_clean;
+    
     %conf matrices
-    conf_matrix = mean(conf_matrices_iter, 1);
-    conf_matrices(i,:) = conf_matrix;
-
-    bal_accuracies(i) = mean(balAccuracies_iter);
-
+    conf_matrix = mean(confMatrices_iter, 1);
+    confMatrices(i,:) = mean(confMatrices_iter, 1);
+    %bal accuracies
+    balAccuracies(i) = mean(balAccuracies_iter);
+    
 end
 
 %sort accuracies
-bal_accuracies(isnan(bal_accuracies)) = -Inf;
-[bal_acc_ranked, indexOrder] = sort(bal_accuracies, 'descend');
-
-%sort F1
-% f1_score(isnan(f1_score)) = -Inf;
-% [f1_ranked, indexOrder] = sort(f1_score, 'descend');
-% conf_matrices_sorted = conf_matrices(indexOrder, :);
-
-% %sort precision
-% precision(isnan(precision)) = -Inf;
-% [prec_ranked, indexOrder] = sort(precision, 'descend');
-% conf_matrices_sorted = conf_matrices(indexOrder, :);
-
+[bal_acc_ranked, indexOrder] = metricSort(balAccuracies, 'descend');
+conf_matrices_ranked = confMatrices(indexOrder, :);
 geneNames_ranked = geneNames(indexOrder);
 
-%plot the accuracies overall
+
+
+
+%-------------------------------------------------------------------------------
+% PLOTTING (make external)
+%-------------------------------------------------------------------------------
+
+%ACCURACY HISTOGRAMS
 figure();
 histogram(bal_acc_ranked, 'Normalization', 'count', 'NumBins', 10);
-title(sprintf('Balanced Accuracy for %g genes in %s', numgenes, area))
+title(sprintf('Balanced Accuracy for %g genes in %s (samples = %g)', numgenes, area, samples))
 xlabel('Balanced accuracy');
 ylabel('Counts');
 
 
-%%***#1 best gene ***
-%%doesn't really make sense for cases when many genes have same top accuracy (usually
-%%numgenes > 1)
-%bestGeneIndex = indexOrder(1);
-%bestGene = string(geneNames(bestGeneIndex))
-
-
-%plotting
+%plotting vars
 range = 'top';
 numplots = 5;
 
@@ -254,107 +120,109 @@ elseif strcmp(range, 'bottom')
     ordered_range = indexOrder(bottomStart:bottomEnd)';
 end
 
-% %make various plots in a certain accuracy range
-% targetIndices = find(isTarget);
-% nonTargetIndices = find(~isTarget);
-% target = genes(isTarget, :);
-% nonTarget = genes(nonTargetIndices, :);
-% prevGeneData = genes(:, prev_best_genes);
-% for i = ordered_range
-%
-%     % Set gene data for this iteration:
-%     gene_combo = [prevGeneData genes(:,i)];
-%
-%     %set cost function
-%     %matrix order is set by 'ClassNames'
-%     cost = size(isTarget(isTarget == 0), 1)/size(isTarget(isTarget == 1), 1);
-%     cost_f = [0, 1; cost, 0];
-%
-%     %train
-%     tree_clean = fitctree(gene_combo, classes, 'MaxNumSplits', numgenes, 'cost', cost_f, 'ClassNames', [1,0]);
-%
-%     %rename threshold
-%     t1 = thresholds_all_CV_noise(i,1);
-%     %change back to clean data
-%
-%     %predictor order
-%     genes_used = tree_clean.CutPredictor;
-%     %problem: these don't correspond to the average thresholds necessarily
-%
-%     %view trees, plotsview, etc.
-%     view(tree_clean,'Mode','graph')
-%     figure;
-%     if (numgenes == 1)
-%         histogram(target(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
-%         title(sprintf('%s : Gene %d with accuracy %g', geneNames{i}, i, bal_accuracies(i)));
-%         if strcmp(geneNames_ranked(i), geneNames(indexOrder(i)))
-%             sprintf("Error: geneNames_ranked(i) is %s and geneNames(indexOrder(i) is %s.", geneNames_ranked{i}, geneNames{indexOrder(i)});
-%         end
-%         hold on;
-%         histogram(nonTarget(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
-%         if ~isnan(t1)
-%             xline(t1, '--r');
-%         end
-%         hold off;
-%         legend({'target', '~target'});
-%
-%     elseif (numgenes == 2)
-%         hold on;
-%         for a = 1:rows
-%             colour = rgbconv(structInfo{a,2}{1});
-%
-%             %             %do this but with colours
-%             %             x = genes(:,prev_best_genes);
-%             %             x_err = noise(:,prev_best_genes);
-%             %             y = genes(:,i);
-%             %             y_err = noise(:,i);
-%             %             errorbar(x, y, y_err, y_err, x_err, x_err, 'o')
-%             %
-%
-%             if isTarget(a)
-%                 x = genes(a,prev_best_genes);
-%                 y = genes(a,i);
-%                 x_err = noise(a,prev_best_genes);
-%                 y_err = noise(a,i);
-%                 errorbar(x, y, y_err, y_err, x_err, x_err, '*', 'color', colour)
-%             else
-%                 x = genes(a,prev_best_genes);
-%                 y = genes(a,i);
-%                 x_err = noise(a,prev_best_genes);
-%                 y_err = noise(a,i);
-%                 errorbar(x, y, y_err, y_err, x_err, x_err, '.', 'color', colour)
-%             end
-%
-%
-%             %             if isTarget(a)
-%             %                 plot(genes(a,prev_best_genes), genes(a,i), '*', 'color', colour);
-%             %             else
-%             %                 plot(genes(a,prev_best_genes), genes(a,i), '.', 'color', colour);
-%             %             end
-%         end
-%         xlim([min(genes(:,prev_best_genes)) - 0.1, max(genes(:,prev_best_genes)) + 0.1])
-%         ylim([min(genes(:,i)) - 0.1, max(genes(:,i)) + 0.1])
-%
-%         %plot thresholds
-%         if strcmp(genes_used{1,1}, 'x1')
-%             xline(t1, '--');
-%             if ~isnan(thresholds_all_CV_noise(i,2))
-%                 t2 = thresholds_all_CV_noise(i,2);
-%                 %this assumes that if numgenes = 2, prevGeneData is just 1 gene
-%                 line([t1,max(prevGeneData)], [t2,t2], 'LineStyle', '--', 'Color', 'k')
-%
-%             end
-%         elseif strcmp (genes_used{1,1}, 'x2')
-%             yline(t1, '--');
-%             if ~isnan(thresholds_all_CV_noise(i,2))
-%                 t2 = thresholds_all_CV_noise(i,2);
-%                 %this assumes that if numgenes = 2, prevGeneData is just 1 gene
-%                 line([t2,t2],[t1, max(prevGeneData)], 'LineStyle', '--', 'Color', 'k')
-%             end
-%         end
-%         hold off;
-%         title(sprintf('Genes %d and %d with accuracy %g', prev_best_genes, i, bal_accuracies(i)));
-%         %legend({'target', 'threshold', '~target'});
-%
-%     end
-% end
+%make various plots in a certain accuracy range
+targetIndices = isTarget;
+nonTargetIndices = find(~isTarget);
+target = genes(targetIndices, :);
+nonTarget = genes(nonTargetIndices, :);
+prevGeneData = genes(:, prevBestGenes);
+
+for i = ordered_range
+    
+    %-------------------------------------------------------------------------------
+    % COMPUTE THRESHOLDS FROM CLEAN DATA
+    %-------------------------------------------------------------------------------    
+    %fetch ideal tree (no CV or noise)
+    tree_clean = trees_all_clean{i};
+    %compute thresholds
+    thresholds_raw = tree_clean.CutPoint; %threshold with nans
+    thresholds = thresholds_raw(~isnan(thresholds_raw));
+    threshold_pan = nan(1,numgenes);
+    threshold_pan(1:length(thresholds)) = thresholds;
+    thresholds_all_clean(i,:) = threshold_pan;
+    
+    %get predictor order
+    genes_used = tree_clean.CutPredictor;    
+    
+    %-------------------------------------------------------------------------------
+    % PLOT TREE GRAPHS
+    %-------------------------------------------------------------------------------
+    
+    view(tree_clean,'Mode','graph')
+    figure;    
+    
+    %-------------------------------------------------------------------------------
+    % PLOT GENE EXPRESSIONS
+    %-------------------------------------------------------------------------------
+    
+    t1 = thresholds_all_clean(i,1);
+    
+    %------------------------
+    % 1D HISTOGRAMS
+    if (numgenes == 1)
+        histogram(target(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
+        title(sprintf('%s : Gene %d with accuracy %g', geneNames{i}, i, balAccuracies(i)));
+        if strcmp(geneNames_ranked(i), geneNames(indexOrder(i)))
+            sprintf("Error: geneNames_ranked(i) is %s and geneNames(indexOrder(i) is %s.", geneNames_ranked{i}, geneNames{indexOrder(i)});
+        end
+        hold on;
+        histogram(nonTarget(:,i), 'Normalization', 'count', 'BinWidth', 0.1);
+        if ~isnan(t1)
+            xline(t1, '--r');
+        end
+        hold off;
+        legend({'target', '~target'});
+        
+    %------------------------    
+    % 2D PLOTS
+    elseif (numgenes == 2)
+        
+        %Plot gene expression data points
+        hold on;        
+        for a = 1:rows
+            %get area colours
+            colour = rgbconv(structInfo{a,2}{1});
+                     
+            %average deviation (i.e. estimate of the average absolute noise)
+            %noiseLevel == standard deviation
+            avgNoise = 0.7979*noiseStDev;
+            
+            %plot data points, formatting corresponding to area and class 
+            if isTarget(a)
+                x = genes(a,prevBestGenes);
+                y = genes(a,i);
+                errorbar(x, y, avgNoise, 'both', '*', 'color', colour)
+            else
+                x = genes(a,prevBestGenes);
+                y = genes(a,i);
+                errorbar(x, y, avgNoise, 'both', '.', 'color', colour)
+            end            
+        end
+        
+        %axis limits
+        xlim([min(genes(:,prevBestGenes)) - 0.1, max(genes(:,prevBestGenes)) + 0.1])
+        ylim([min(genes(:,i)) - 0.1, max(genes(:,i)) + 0.1])
+        
+        %plot thresholds
+        if strcmp(genes_used{1,1}, 'x1')
+            xline(t1, '--');
+            if ~isnan(thresholds_all_clean(i,2))
+                t2 = thresholds_all_clean(i,2);
+                %this assumes that if numgenes = 2, prevGeneData is just 1 gene
+                line([t1,max(prevGeneData)], [t2,t2], 'LineStyle', '--', 'Color', 'k')                
+            end
+            
+        elseif strcmp (genes_used{1,1}, 'x2')
+            yline(t1, '--');
+            if ~isnan(thresholds_all_clean(i,2))
+                t2 = thresholds_all_clean(i,2);
+                %this assumes that if numgenes = 2, prevGeneData is just 1 gene
+                line([t2,t2],[t1, max(prevGeneData)], 'LineStyle', '--', 'Color', 'k')
+            end
+        end
+        hold off;
+        title(sprintf('Genes %d and %d with accuracy %g', prevBestGenes, i, balAccuracies(i)));
+        %legend({'target', 'threshold', '~target'});
+        
+    end
+end
