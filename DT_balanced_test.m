@@ -5,25 +5,32 @@ clear all;
 %nonTarget = rand(100000,1);
 
 %make dummy data
-target = normrnd(3,1,100, 1);
-nonTarget = normrnd(0,1,10000, 1);
+targetCentre = 3;  nonTargetCentre = 0;
+targetSize = 100;  nonTargetSize = 10000;
+target = normrnd(targetCentre,1,targetSize, 1);
+nonTarget = normrnd(nonTargetCentre,1,nonTargetSize, 1);
 allData = [target; nonTarget];
 
 %set classes
 classes = zeros(size(target,1)+size(nonTarget,1),1);
 classes(1:size(target,1),:) = 1;
 
-%set costs
-cost_f = [0, 100; 1, 0];
+%set cost function (balanced)
+costFunc = ComputeBalancedCostFunc(classes);
 
 %train
-tree = fitctree(allData, classes, 'MaxNumSplits', 1, 'cost', cost_f, 'ClassNames', [1,0]);
-
-
+tree = fitctree(allData, classes, 'MaxNumSplits', 1, 'cost', costFunc, 'ClassNames', [1,0]);
 
 % Store threshold 
 threshold_raw = tree.CutPoint; %threshold with NaNs
 threshold = threshold_raw(~isnan(threshold_raw));
+
+%test
+predictedLabels = predict(tree, allData);
+
+%calc confusion mat & bal accuracy
+[confMat,balAcc] = ComputeConfusion(classes,predictedLabels);
+
 
 
 %view
