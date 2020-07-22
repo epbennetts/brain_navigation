@@ -1,17 +1,9 @@
-% %dummy params
-% clear all;
-% close all force;
-% params = SetDefaultParams();
-% 
-% cols = 19114;
-% samples = 20;
-% area = "Isocortex";
-% %prev_best_genes = [4307, 636, 148]; %for noise
-% prevBestGenes = [3725];
-% noiseStDev = 1;
+%test params
+clear all;
+close all force;
+params = SetTestParams();
 
-
-function [indexOrder, balAcc_ranked, confMatrices_ranked, geneNames_ranked, trees_all_clean] = DT_classification_multiple(samples, area, prevBestGenes, noiseStDev)
+%function [indexOrder, balAcc_ranked, confMatrices_ranked, geneNames_ranked, trees_all_clean] = DT_classification_multiple(samples, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
 %Finds the gene within the sample that performs best at classifying the target areas with a DT, in combination with prev_best_genes.
 %Ranks genes according to performance (balanced accuracy).
 %Will also plot a histogram of the accuracies
@@ -36,7 +28,6 @@ trees_all_clean = cell(samples,1);
 % samples == num genes
 for i = 1:samples
     
-    numNoiseIterations = 15;
     confMatrices_iter = nan(numNoiseIterations,4);
     balAccuracies_iter = nan(numNoiseIterations,1);
     
@@ -52,7 +43,6 @@ for i = 1:samples
         %set cost function
         costFunc = ComputeBalancedCostFunc(isTarget);        
         %make stratified CV folds
-        numFolds = 10;
         partition = cvpartition(classes,'KFold',numFolds,'Stratify',true);
                 
         % TRAINING AND TESTING
@@ -97,36 +87,32 @@ xlabel('Balanced accuracy');
 ylabel('Counts');
 
 
-%plotting vars
-range = 'top';
-numplots = 5;
+%plotting vars:
+prevGeneData = genes(:, prevBestGenes);
 thresholds_all_clean = nan(samples, numGenes);
-
-%various plotting thresholds
-plots = numplots;
-middleStart = samples*0.2;
-middleEnd = middleStart + plots - 1;
-bottomStart = samples - plots + 1;
-bottomEnd = samples;
-
-if strcmp(range,'top')
-    %top n
-    orderedRange = indexOrder(1:plots)';
-elseif strcmp(range, 'middle')
-    %middle n
-    orderedRange = indexOrder(middleStart:middleEnd)';
-elseif strcmp(range, 'bottom')
-    %bottom n
-    orderedRange = indexOrder(bottomStart:bottomEnd)';
-end
-
-%make various plots in a certain accuracy range
+%non/target indices (to plot them differently)
 targetIndices = isTarget;
 nonTargetIndices = find(~isTarget);
 target = genes(targetIndices, :);
 nonTarget = genes(nonTargetIndices, :);
-prevGeneData = genes(:, prevBestGenes);
 
+%various plotting thresholds
+if strcmp(range,'top')
+    %top n
+    orderedRange = indexOrder(1:numplots)';
+elseif strcmp(range, 'middle')
+    middleStart = samples*0.2;
+    middleEnd = middleStart + numplots - 1;
+    %middle n
+    orderedRange = indexOrder(middleStart:middleEnd)';
+elseif strcmp(range, 'bottom')
+    bottomStart = samples - numplots + 1;
+    bottomEnd = samples;
+    %bottom n
+    orderedRange = indexOrder(bottomStart:bottomEnd)';
+end
+
+%make plots for given accuracy range
 for i = orderedRange
     
     %-------------------------------------------------------------------------------
