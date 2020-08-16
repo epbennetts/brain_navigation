@@ -1,33 +1,49 @@
-close all force;
 clear all;
+close all force;
 
 %-------------------------------------------------------------------------------
-% Parameters:
-area = 'Isocortex';
-%-------------------------------------------------------------------------------
-
 % Loads in the data, and sets up targets/nontargets for the chosen area:
+params = SetTestParams(); 
+area = params.area;
 [genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
+
+%see how to make SetTestParams() work without having to do area = params.area, etc. 
+params = SetTestParams(); 
+
 %-------------------------------------------------------------------------------
 % Parameters:
-numgenes = 3;
-samples = cols;
+%-------------------------------------------------------------------------------
+%"Translate" params (do this better)
+costFunction = params.costFunction;
+
+noiseStDev = params.noiseStDev;
+numNoiseIterations = params.numNoiseIterations;
+numFolds = params.numFolds;
+%-------------------------------------------------------------------------------
+% Extra Parameters:
+prevBestGenes = [];
+samples = 10;
+numgenes = 10;
 %-------------------------------------------------------------------------------
 
 % Initialize arrays
-top_accuracy = zeros(numgenes,1);
-best_genes = zeros(numgenes,1);
+top_accuracy = NaN(numgenes,1);
+best_genes = NaN(numgenes,1);
 best_gene_names = strings(numgenes,1);
 
 % Loop through one gene at a time
 for n = 1:numgenes
     disp(n)
-    [indexOrder, accuracies_ranked, genenames_ranked, thresholds_all] = ...
-                    DT_classification_multiple(samples, area, best_genes(1:n-1));
+    [indexOrder, balAcc_ranked, confMatrices_ranked, geneNames_ranked, trees_all_clean] = ...
+                    DT_classification_multiple(samples, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations);
     best_genes(n) = indexOrder(1);
-    best_gene_names(n) = genenames_ranked{1};
-    top_accuracy(n) = accuracies_ranked(1);
+    prevBestGenes = [prevBestGenes best_genes(n)];
+    best_gene_names(n) = geneNames_ranked{1};
+    top_accuracy(n) = balAcc_ranked(1);
+    if (n > 1) && (top_accuracy(n) < top_accuracy(n-1)) 
+        break;
+    end
 end
 
 %-------------------------------------------------------------------------------

@@ -1,18 +1,19 @@
 function params = SetTestParams()
 
+%DATA
 params.area = 'Isocortex';
-params.numFolds = 10;
-params.numNoiseRepeats = 1;
-params.costFunction = 'balanced';
-
 params.cols = 19114;
-params.samples = 20;
-params.area = "Isocortex";
-params.prevBestGenes = [];
-params.noiseStDev = 1;
-params.numNoiseIterations = 15;
+params.prevBestGenes = [];%[12782];
+
+%TREE
+params.costFunction = 'balanced';
+%CV
 params.numFolds = 10;
-%plotting
+%noise
+params.noiseStDev = 0.75;
+params.numNoiseIterations = 30;
+
+%PLOTTING
 params.numplots = 5;
 params.range = 'top';
 

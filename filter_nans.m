@@ -64,7 +64,6 @@ for i = 1:rows
 end
 
 nans_left = genes(isnan(genes));  % --> none left
-
 geneNames = table2array(colLabels(:,1));
 
 end
