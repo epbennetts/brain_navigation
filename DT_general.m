@@ -23,7 +23,7 @@ numFolds = params.numFolds;
 %-------------------------------------------------------------------------------
 % Extra Parameters:
 prevBestGenes = [];
-samples = 10;
+samples = 100;
 numgenes = 10;
 %-------------------------------------------------------------------------------
 
@@ -63,3 +63,8 @@ numplots = 5;
 range = 'top';
 %work on this function
 %DT_plot_multiple(genes, geneNames, numgenes, best_genes, isTarget, thresholds_all, samples, indexOrder, numplots, range)
+
+%end of program
+WarnWave = [sin(1:.6:400), sin(1:.7:400), sin(1:.4:400)];
+Audio = audioplayer(WarnWave, 22050);
+play(Audio);
