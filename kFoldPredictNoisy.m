@@ -24,7 +24,6 @@ for k = 1:numFolds
     
     %TESTING
     % Add noise to test gene-expression data
-    noiseStDev = 1;
     geneDataTestNoisy = geneDataTest + noiseStDev*(randn(size(geneDataTest)));
     % Store predictions from the trained model on the noisy test data
     predictedLabels(testIndices) = predict(treeFoldTrain, geneDataTestNoisy);
