@@ -24,7 +24,8 @@ numFolds = params.numFolds;
 % Extra Parameters:
 geneSamples = 10;
 numgenes = 1;
-noiseLevelSamples = [0:0.2:2];
+noiseLevelSamples = [0:50:200];
+noiseLevelSamples = [noiseLevelSamples 1000 10000];
 numNoiseSamples = size(noiseLevelSamples,2);
 %-------------------------------------------------------------------------------
 
@@ -34,8 +35,9 @@ topAccuracy = NaN(numNoiseSamples,1);
 % Loop through one gene at a time
 for n = 1:numNoiseSamples
     disp(n)
+    disp(noiseLevelSamples(n))
     [indexOrder, balAcc_ranked, confMatrices_ranked, geneNames_ranked, trees_all_clean] = ...
-                    DT_classification_multiple(geneSamples, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations);
+                    DT_classification_multiple(geneSamples, area, prevBestGenes, noiseLevelSamples(n), numFolds, numNoiseIterations);
     topAccuracy(n) = balAcc_ranked(1);
 end
 

@@ -1,4 +1,5 @@
 function params = SetTestParams()
+%Set vars
 
 %DATA
 params.area = 'Isocortex';

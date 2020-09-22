@@ -1,3 +1,6 @@
+%Main program from which we run everything else (when working locally)
+%(This is probably not going to be the script that cluster will run)
+
 clear all;
 close all force;
 
@@ -9,7 +12,7 @@ area = params.area;
 [rows, cols] = size(genes);
 
 %see how to make SetTestParams() work without having to do area = params.area, etc. 
-params = SetTestParams(); 
+params = SetTestParams();
 
 %-------------------------------------------------------------------------------
 % Parameters:
@@ -28,7 +31,7 @@ numgenes = 10;
 %-------------------------------------------------------------------------------
 
 % Initialize arrays
-top_accuracy = NaN(numgenes,1);
+top_accuracies = NaN(numgenes,1);
 best_genes = NaN(numgenes,1);
 best_gene_names = strings(numgenes,1);
 
@@ -40,29 +43,23 @@ for n = 1:numgenes
     best_genes(n) = indexOrder(1);
     prevBestGenes = [prevBestGenes best_genes(n)];
     best_gene_names(n) = geneNames_ranked{1};
-    top_accuracy(n) = balAcc_ranked(1);
-    if (n > 1) && (top_accuracy(n) < top_accuracy(n-1)) 
+    top_accuracies(n) = balAcc_ranked(1);
+    if (n > 1) && (top_accuracies(n) < top_accuracies(n-1)) 
         break;
     end
 end
 
 %-------------------------------------------------------------------------------
-% Plot accuracy increase:
-numgenes_array = 1:numgenes;
-figure();
-plot(numgenes_array, top_accuracy,'.-b');
-title(sprintf('Accuracy vs # genes in %s', area));
-xlabel('Num genes used in DTs')
-ylabel('Accuracy')
-set(gca,'xtick', 0:numgenes)
-grid on;
+% ACCURACIES PLOT
+DT_plot_accuracies(numgenes, top_accuracies, area)
 
-
-%Plot thresholds
-numplots = 5;
-range = 'top';
-%work on this function
-%DT_plot_multiple(genes, geneNames, numgenes, best_genes, isTarget, thresholds_all, samples, indexOrder, numplots, range)
+%PLOT GENE EXPRESSION & THRESHOLDS? 
+% later in separate function:
+% %Plot thresholds
+% numplots = 5;
+% range = 'top';
+% %work on this functionethi
+% %DT_plot_multiple(genes, geneNames, numgenes, best_genes, isTarget, thresholds_all, samples, indexOrder, numplots, range)
 
 %end of program
 WarnWave = [sin(1:.6:400), sin(1:.7:400), sin(1:.4:400)];

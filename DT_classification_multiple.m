@@ -20,6 +20,7 @@
 % samples = 5;
 
 function [indexOrder, balAcc_ranked, confMatrices_ranked, geneNames_ranked, trees_all_clean] = DT_classification_multiple(samples, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
+%
 %Finds the gene within the sample that performs best at classifying the target areas with a DT, in combination with prev_best_genes.
 %Ranks genes according to performance (balanced accuracy).
 %Will also plot a histogram of the accuracies
@@ -40,7 +41,7 @@ confMatrices = zeros(samples,4);
 trees_all_clean = cell(samples,1);
 
 %test
-disp('numgenes is:')
+disp('numgenes considered at once is:')
 disp(numGenes)
 
 %loop over genes or subset, classify and evaluate metrics
@@ -92,8 +93,6 @@ confMatrices_ranked = confMatrices(indexOrder, :);
 geneNames_ranked = geneNames(indexOrder);
 
 
-
-
 %-------------------------------------------------------------------------------
 % PLOTTING (make external)
 %-------------------------------------------------------------------------------
@@ -104,8 +103,8 @@ histogram(balAcc_ranked, 'Normalization', 'count', 'NumBins', 10);
 title(sprintf('Balanced Accuracy for %g genes in %s (samples = %g)', numGenes, area, samples))
 xlabel('Balanced accuracy');
 ylabel('Counts');
-
-
+% 
+% 
 % %plotting vars:
 % prevGeneData = genes(:, prevBestGenes);
 % thresholds_all_clean = nan(samples, numGenes);
@@ -204,9 +203,11 @@ ylabel('Counts');
 %             end            
 %         end
 %         
+%         %make square plot
+%         axis equal
 %         %axis limits
 %         xlim([min(genes(:,prevBestGenes)) - 0.1, max(genes(:,prevBestGenes)) + 0.1])
-%         ylim([min(genes(:,i)) - 0.1, max(genes(:,i)) + 0.1])
+%         ylim([min(genes(:,i)) - 0.1, max(genes(:,i)) + 0.1])        
 %         
 %         %plot thresholds
 %         if strcmp(genesUsed{1,1}, 'x1')

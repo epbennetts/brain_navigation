@@ -3,6 +3,28 @@ function [] = DT_plot_multiple(genes, geneNames, target, nonTarget, thresholds_a
 %inputs: thresholds, ..., numplots, range
 %does: plots the gene expression plots with thresholds for the given 
 
+%-------------------------------------------------------------------------------
+% ACCURACY HISTOGRAMS
+%-------------------------------------------------------------------------------
+figure();
+histogram(balAcc_ranked, 'Normalization', 'count', 'NumBins', 10);
+title(sprintf('Balanced Accuracy for %g genes in %s (samples = %g)', numGenes, area, samples))
+xlabel('Balanced accuracy');
+ylabel('Counts');
+
+%-------------------------------------------------------------------------------
+% GENE EXPRESSION PLOTS
+%-------------------------------------------------------------------------------
+% %Don't think need this:
+% %plotting vars
+% prevGeneData = genes(:, prevBestGenes);
+% thresholds_all_clean = nan(samples, numGenes);
+% %non/target indices (to plot them differently)
+% targetIndices = isTarget;
+% nonTargetIndices = find(~isTarget);
+% target = genes(targetIndices, :);
+% nonTarget = genes(nonTargetIndices, :);
+
 %various plotting thresholds
 plots = numplots;
 middleStart = samples*0.2;
