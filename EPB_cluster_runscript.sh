@@ -10,7 +10,7 @@
 #PBS -l walltime=20:00:00
 # Email user if job ends or aborts
 # PBS -m ea
-#PBS –M eper8035@uni.sydney.edu.au
+# PBS –M eper8035@uni.sydney.edu.au
 #PBS -V
 
 # your commands/programs start here, for example:
