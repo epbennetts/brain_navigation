@@ -8,7 +8,7 @@ close all force;
 % Loads in the data, and sets up targets/nontargets for the chosen area:
 %(see how to make SetTestParams() work without having to do area = params.area, etc).
 params = SetTestParams();  
-area = 'Midbrain';
+area = 'Medulla';
 [genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
@@ -51,4 +51,4 @@ for n = 1:numGenesInDT
     end
 end
 
-save('AccuracyVsNumGenes_Midbrain.mat')
+save('AccuracyVsNumGenes_Medulla.mat')
