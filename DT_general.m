@@ -50,3 +50,5 @@ for n = 1:numGenesInDT
         break;
     end
 end
+
+save('workspace.mat')
