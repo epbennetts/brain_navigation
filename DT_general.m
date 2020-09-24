@@ -1,67 +1,52 @@
-%Main program from which we run everything else (when working locally)
-%(This is probably not going to be the script that cluster will run)
+%Finds best genes and accuracies for 1, 2, ... n genes considered in the DT at a
+%time. Allows to see how accuracy changes as we increase the number of genes
+%in the DT. 
 
-clear all;
+clear vars;
 close all force;
 
 %-------------------------------------------------------------------------------
+% Parameters (!!)
+%-------------------------------------------------------------------------------
+prevBestGenes = [];
+sizeGeneSubset = 20;
+numGenesInDT = 10;
+%-------------------------------------------------------------------------------
+
+
 % Loads in the data, and sets up targets/nontargets for the chosen area:
-params = SetTestParams(); 
+params = SetTestParams(); %see how to make SetTestParams() work without having to do area = params.area, etc. 
 area = params.area;
 [genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
-%see how to make SetTestParams() work without having to do area = params.area, etc. 
-params = SetTestParams();
-
 %-------------------------------------------------------------------------------
-% Parameters:
-%-------------------------------------------------------------------------------
+% More Parameters:
 %"Translate" params (do this better)
 costFunction = params.costFunction;
 
 noiseStDev = params.noiseStDev;
 numNoiseIterations = params.numNoiseIterations;
 numFolds = params.numFolds;
-%-------------------------------------------------------------------------------
-% Extra Parameters:
-prevBestGenes = [];
-samples = 100;
-numgenes = 10;
-%-------------------------------------------------------------------------------
+
 
 % Initialize arrays
-top_accuracies = NaN(numgenes,1);
-best_genes = NaN(numgenes,1);
-best_gene_names = strings(numgenes,1);
+top_accuracies = NaN(numGenesInDT,1);
+best_geneIndices = NaN(numGenesInDT,1);
+best_gene_names = strings(numGenesInDT,1);
 
-% Loop through one gene at a time
-for n = 1:numgenes
+% Greedy approach: Add 1 more gene into the DT each time 
+for n = 1:numGenesInDT
+    disp('num genes considered at once in the DT is:')
     disp(n)
-    [indexOrder, balAcc_ranked, confMatrices_ranked, geneNames_ranked, trees_all_clean] = ...
-                    DT_classification_multiple(samples, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations);
-    best_genes(n) = indexOrder(1);
-    prevBestGenes = [prevBestGenes best_genes(n)];
+    [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean] = ...
+                    DT_classification_multiple(sizeGeneSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations);
+    best_geneIndices(n) = indexOrder(1);
+    prevBestGenes = [prevBestGenes best_geneIndices(n)];
     best_gene_names(n) = geneNames_ranked{1};
     top_accuracies(n) = balAcc_ranked(1);
+    %stopping criterion: the accuracy decreases
     if (n > 1) && (top_accuracies(n) < top_accuracies(n-1)) 
         break;
     end
 end
-
-%-------------------------------------------------------------------------------
-% ACCURACIES PLOT
-DT_plot_accuracies(numgenes, top_accuracies, area)
-
-%PLOT GENE EXPRESSION & THRESHOLDS? 
-% later in separate function:
-% %Plot thresholds
-% numplots = 5;
-% range = 'top';
-% %work on this functionethi
-% %DT_plot_multiple(genes, geneNames, numgenes, best_genes, isTarget, thresholds_all, samples, indexOrder, numplots, range)
-
-%end of program
-WarnWave = [sin(1:.6:400), sin(1:.7:400), sin(1:.4:400)];
-Audio = audioplayer(WarnWave, 22050);
-play(Audio);

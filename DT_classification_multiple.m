@@ -19,7 +19,7 @@
 % %how many genes considered in this run:
 % samples = 5;
 
-function [indexOrder, balAcc_ranked, confMatrices_ranked, geneNames_ranked, trees_all_clean] = DT_classification_multiple(samples, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
+function [indexOrder, geneNames_ranked, balAccuracies_ranked, confMatrices_ranked, trees_all_clean] = DT_classification_multiple(sizeGeneSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
 %
 %Finds the gene within the sample that performs best at classifying the target areas with a DT, in combination with prev_best_genes.
 %Ranks genes according to performance (balanced accuracy).
@@ -30,23 +30,23 @@ function [indexOrder, balAcc_ranked, confMatrices_ranked, geneNames_ranked, tree
 %prev_best_genes: indices of the best genes obtained from previous iterations. 
 
 %SET VARS
-numGenes = length(prevBestGenes) + 1;
+numGenesInDT = length(prevBestGenes) + 1;
 [genes, isTarget, geneNames, structInfo] = filter_nans(area);
 %rows == #areas,  cols = #genes in the data
 [rows, cols] = size(genes);
 classes = isTarget;
 %empty arrays
-balAccuracies = zeros(samples,1);
-confMatrices = zeros(samples,4);
-trees_all_clean = cell(samples,1);
+balAccuracies = zeros(sizeGeneSubset,1);
+confMatrices = zeros(sizeGeneSubset,4);
+trees_all_clean = cell(sizeGeneSubset,1);
 
-%test
-disp('numgenes considered at once is:')
-disp(numGenes)
+% %test
+% disp('num genes considered at once is:')
+% disp(numGenesAtOnce)
 
 %loop over genes or subset, classify and evaluate metrics
 % samples == num genes
-for i = 1:samples
+for i = 1:sizeGeneSubset
     
     confMatrices_iter = nan(numNoiseIterations,4);
     balAccuracies_iter = nan(numNoiseIterations,1);
@@ -67,7 +67,7 @@ for i = 1:samples
                 
         % TRAINING AND TESTING
         %Iterating through CV folds, random noise in testing 
-        [predictedLabels] = kFoldPredictNoisy(geneCombo, rows, classes, numGenes, noiseStDev, costFunc, partition, numFolds);
+        [predictedLabels] = kFoldPredictNoisy(geneCombo, rows, classes, numGenesInDT, noiseStDev, costFunc, partition, numFolds);
         
         % Across the folds, predicted class labels are filled into predictedLabels
         % classes == real labels
@@ -76,7 +76,7 @@ for i = 1:samples
     end
     
     % COMPUTE AND SAVE IDEAL TREES (no CV or noise)
-    tree_clean = fitctree(geneCombo, classes, 'MaxNumSplits', numGenes, 'cost', costFunc, 'ClassNames', [1,0]);
+    tree_clean = fitctree(geneCombo, classes, 'MaxNumSplits', numGenesInDT, 'cost', costFunc, 'ClassNames', [1,0]);
     trees_all_clean{i,1} = tree_clean;
     
     %conf matrices
@@ -88,7 +88,7 @@ for i = 1:samples
 end
 
 %sort accuracies
-[balAcc_ranked, indexOrder] = metricSort(balAccuracies, 'descend');
+[balAccuracies_ranked, indexOrder] = metricSort(balAccuracies, 'descend');
 confMatrices_ranked = confMatrices(indexOrder, :);
 geneNames_ranked = geneNames(indexOrder);
 
@@ -96,13 +96,10 @@ geneNames_ranked = geneNames(indexOrder);
 %-------------------------------------------------------------------------------
 % PLOTTING (make external)
 %-------------------------------------------------------------------------------
+%HISTOGRAMS
+numBins = 10;
+plotAccuracyHistogram(balAccuracies_ranked, numBins, numGenesInDT, area, sizeGeneSubset)
 
-%ACCURACY HISTOGRAMS
-figure();
-histogram(balAcc_ranked, 'Normalization', 'count', 'NumBins', 10);
-title(sprintf('Balanced Accuracy for %g genes in %s (samples = %g)', numGenes, area, samples))
-xlabel('Balanced accuracy');
-ylabel('Counts');
 % 
 % 
 % %plotting vars:
