@@ -8,7 +8,7 @@ close all force;
 % Loads in the data, and sets up targets/nontargets for the chosen area:
 %(see how to make SetTestParams() work without having to do area = params.area, etc).
 params = SetTestParams();  
-area = params.area;
+area = 'Thalamus';
 [genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
