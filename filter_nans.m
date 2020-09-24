@@ -1,7 +1,7 @@
 function [genes, isTarget, geneNames, rowLabels] = filter_nans(area)
 
 %load new dataset (have to check which section)
-load("C:\Users\elobe\Dropbox\1_HONOURS\~RESEARCH~\code\data\AllenGeneDataset_19419_Ben.mat", '-mat');
+load('AllenGeneDataset_19419_Ben.mat');
 genes = GeneExpData.combZ.energy; %for example
 colLabels = geneInfo;
 rowLabels = structInfo;
