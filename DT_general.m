@@ -51,4 +51,4 @@ for n = 1:numGenesInDT
     end
 end
 
-save('AccuracyVsNumGenes.mat')
+save('AccuracyVsNumGenes_Thalamus.mat')
