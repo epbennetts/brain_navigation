@@ -5,22 +5,22 @@
 clear vars;
 close all force;
 
-%-------------------------------------------------------------------------------
-% Parameters (!!)
-%-------------------------------------------------------------------------------
-prevBestGenes = [];
-sizeGeneSubset = 20;
-numGenesInDT = 10;
-%-------------------------------------------------------------------------------
-
-
 % Loads in the data, and sets up targets/nontargets for the chosen area:
-params = SetTestParams(); %see how to make SetTestParams() work without having to do area = params.area, etc. 
+%(see how to make SetTestParams() work without having to do area = params.area, etc).
+params = SetTestParams();  
 area = params.area;
 [genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
 %-------------------------------------------------------------------------------
+% Parameters (!!)
+%-------------------------------------------------------------------------------
+prevBestGenes = [];
+sizeGeneSubset = cols;
+numGenesInDT = 10;
+%-------------------------------------------------------------------------------
+
+
 % More Parameters:
 %"Translate" params (do this better)
 costFunction = params.costFunction;
@@ -51,4 +51,4 @@ for n = 1:numGenesInDT
     end
 end
 
-save('workspace.mat')
+save('AccuracyVsNumGenes.mat')
