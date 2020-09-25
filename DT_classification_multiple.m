@@ -19,7 +19,7 @@
 % %how many genes considered in this run:
 % samples = 5;
 
-function [indexOrder, geneNames_ranked, balAccuracies_ranked, confMatrices_ranked, trees_all_clean] = DT_classification_multiple(sizeGeneSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
+function [indexOrder, geneNames_ranked, balAccuracies_ranked, confMatrices_ranked, trees_all_clean] = DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
 %
 %Finds the gene within the sample that performs best at classifying the target areas with a DT, in combination with prev_best_genes.
 %Ranks genes according to performance (balanced accuracy).
@@ -36,9 +36,9 @@ numGenesInDT = length(prevBestGenes) + 1;
 [rows, cols] = size(genes);
 classes = isTarget;
 %empty arrays
-balAccuracies = zeros(sizeGeneSubset,1);
-confMatrices = zeros(sizeGeneSubset,4);
-trees_all_clean = cell(sizeGeneSubset,1);
+balAccuracies = zeros(sizeSampleSubset,1);
+confMatrices = zeros(sizeSampleSubset,4);
+trees_all_clean = cell(sizeSampleSubset,1);
 
 % %test
 % disp('num genes considered at once is:')
@@ -46,11 +46,12 @@ trees_all_clean = cell(sizeGeneSubset,1);
 
 %loop over genes or subset, classify and evaluate metrics
 % samples == num genes
-for i = 1:sizeGeneSubset
+parfor i = 1:sizeSampleSubset
     
     confMatrices_iter = nan(numNoiseIterations,4);
     balAccuracies_iter = nan(numNoiseIterations,1);
     
+    %why can't do parfor here?
     for iter = 1:numNoiseIterations
         
         %SELECT GENE DATA
@@ -98,7 +99,7 @@ geneNames_ranked = geneNames(indexOrder);
 %-------------------------------------------------------------------------------
 %HISTOGRAMS
 numBins = 10;
-plotAccuracyHistogram(balAccuracies_ranked, numBins, numGenesInDT, area, sizeGeneSubset)
+plotAccuracyHistogram(balAccuracies_ranked, numBins, numGenesInDT, area, sizeSampleSubset)
 
 % 
 % 

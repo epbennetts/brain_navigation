@@ -8,7 +8,7 @@ close all force;
 % Loads in the data, and sets up targets/nontargets for the chosen area:
 %(see how to make SetTestParams() work without having to do area = params.area, etc).
 params = SetTestParams();  
-area = 'Medulla';
+area = 'Isocortex';
 [genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
@@ -16,7 +16,7 @@ area = 'Medulla';
 % Parameters (!!)
 %-------------------------------------------------------------------------------
 prevBestGenes = [];
-sizeGeneSubset = cols;
+sizeSampleSubset = 9;
 numGenesInDT = 10;
 %-------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ for n = 1:numGenesInDT
     disp('num genes considered at once in the DT is:')
     disp(n)
     [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean] = ...
-                    DT_classification_multiple(sizeGeneSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations);
+                    DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations);
     best_geneIndices(n) = indexOrder(1);
     prevBestGenes = [prevBestGenes best_geneIndices(n)];
     best_gene_names(n) = geneNames_ranked{1};
@@ -51,4 +51,4 @@ for n = 1:numGenesInDT
     end
 end
 
-save('AccuracyVsNumGenes_Medulla.mat')
+save('AccuracyVsNumGenes_Isocortex.mat')
