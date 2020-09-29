@@ -19,4 +19,5 @@ cd "$PBS_O_WORKDIR"
 hostname
 # Launch the Matlab job
 module load Matlab2019b
-matlab -nodisplay -singleCompThread -r "Test_Runscript; exit"
+# matlab -nodisplay -singleCompThread -r "Test_Runscript; exit"
+matlab -nodisplay -singleCompThread -r "Test; exit"
