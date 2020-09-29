@@ -46,7 +46,7 @@ trees_all_clean = cell(sizeSampleSubset,1);
 
 %loop over genes or subset, classify and evaluate metrics
 % samples == num genes
-parfor i = 1:sizeSampleSubset
+for i = 1:sizeSampleSubset
     
     confMatrices_iter = nan(numNoiseIterations,4);
     balAccuracies_iter = nan(numNoiseIterations,1);
