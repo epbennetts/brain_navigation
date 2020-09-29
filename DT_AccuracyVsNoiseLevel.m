@@ -24,7 +24,7 @@ numFolds = params.numFolds;
 % Extra Parameters:
 sizeSampleSubset = cols;
 numGenesInDT = 1;
-noiseLevelSamples = [0:0.2:2.5];
+noiseLevelSamples = [0:0.2:3.5];
 numNoiseSamples = size(noiseLevelSamples,2);
 %-------------------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ numNoiseSamples = size(noiseLevelSamples,2);
 topAccuracies = NaN(numNoiseSamples,1);
 
 % Loop through one gene at a time
-parfor n = 1:numNoiseSamples
+for n = 1:numNoiseSamples
     disp("Current noise iteration:")
     disp(n)
     disp(noiseLevelSamples(n))
