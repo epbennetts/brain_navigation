@@ -16,7 +16,7 @@ area = 'Isocortex';
 % Parameters (!!)
 %-------------------------------------------------------------------------------
 prevBestGenes = [];
-sizeSampleSubset = 9;
+sizeSampleSubset = cols;
 numGenesInDT = 10;
 %-------------------------------------------------------------------------------
 
@@ -51,4 +51,4 @@ for n = 1:numGenesInDT
     end
 end
 
-save('AccuracyVsNumGenes_Isocortex.mat')
+save('AccuracyVsNumGenes_Isocortex_Actual.mat')
