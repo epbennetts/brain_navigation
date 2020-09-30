@@ -24,7 +24,7 @@ numFolds = params.numFolds;
 % Extra Parameters:
 sizeSampleSubset = cols;
 numGenesInDT = 1;
-noiseLevelSamples = [0:0.2:3.5];
+noiseLevelSamples = params.noiseLevelSamples;
 numNoiseSamples = size(noiseLevelSamples,2);
 %-------------------------------------------------------------------------------
 
