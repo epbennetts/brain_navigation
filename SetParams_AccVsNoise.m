@@ -3,7 +3,7 @@ function params = SetParams_AccVsNoise()
 
 params.cols = 19114;
 %MAIN PARAMS (!!)
-params.sizeSampleSubset = cols; %!
+params.sizeSampleSubset = 1000; %!
 params.area = 'Isocortex';
 params.prevBestGenes = []; 
 
