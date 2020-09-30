@@ -41,18 +41,20 @@ confMatrices = zeros(sizeSampleSubset,4);
 trees_all_clean = cell(sizeSampleSubset,1);
 
 % %test
-% disp('num genes considered at once is:')
-% disp(numGenesAtOnce)
+fprintf('NEXT CLASSIFICATION ITERATION \n')
+fprintf('(printed from DT_class) num genes considered at once is: %d \n', numGenesInDT)
 
 %loop over genes or subset, classify and evaluate metrics
 % samples == num genes
 for i = 1:sizeSampleSubset
-    
+    %fprintf('NEXT GENE (%d) \n', i)
+        
     confMatrices_iter = nan(numNoiseIterations,4);
     balAccuracies_iter = nan(numNoiseIterations,1);
     
     %why can't do parfor here?
     for iter = 1:numNoiseIterations
+        %fprintf('noise iteration: %d (printed from DT_class) \n', iter);
         
         %SELECT GENE DATA
         % Previously selected genes:
@@ -97,12 +99,13 @@ geneNames_ranked = geneNames(indexOrder);
 %-------------------------------------------------------------------------------
 % PLOTTING (make external)
 %-------------------------------------------------------------------------------
-%HISTOGRAMS
-numBins = 10;
-plotAccuracyHistogram(balAccuracies_ranked, numBins, numGenesInDT, area, sizeSampleSubset)
 
-% 
-% 
+% %HISTOGRAMS
+% numBins = 10;
+% plotAccuracyHistogram(balAccuracies_ranked, numBins, numGenesInDT, area, sizeSampleSubset)
+
+ 
+ 
 % %plotting vars:
 % prevGeneData = genes(:, prevBestGenes);
 % thresholds_all_clean = nan(samples, numGenes);

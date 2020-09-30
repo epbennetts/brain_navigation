@@ -7,27 +7,31 @@ close all force;
 
 % Loads in the data, and sets up targets/nontargets for the chosen area:
 %(see how to make SetTestParams() work without having to do area = params.area, etc).
-params = SetTestParams();  
-area = 'Isocortex';
+params = SetParams_AccVsNumGenes();  
 [genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
 %-------------------------------------------------------------------------------
 % Parameters (!!)
+%Check in params file: 
 %-------------------------------------------------------------------------------
-prevBestGenes = [];
-sizeSampleSubset = cols;
-numGenesInDT = 10;
+%size sample subset
+%area
+%(prev best genes)
 %-------------------------------------------------------------------------------
-
 
 % More Parameters:
 %"Translate" params (do this better)
+area = params.area;
+AccuracyVsNumGenes_filename = params.AccuracyVsNumGenes_filename;
+sizeSampleSubset = params.sizeSampleSubset;
+
 costFunction = params.costFunction;
 
 noiseStDev = params.noiseStDev;
 numNoiseIterations = params.numNoiseIterations;
 numFolds = params.numFolds;
+numGenesInDT = params.numGenesInDT;
 
 
 % Initialize arrays
@@ -37,18 +41,22 @@ best_gene_names = strings(numGenesInDT,1);
 
 % Greedy approach: Add 1 more gene into the DT each time 
 for n = 1:numGenesInDT
-    disp('num genes considered at once in the DT is:')
-    disp(n)
+    fprintf('(printed from general) Num genes considered at once in the DT is: %d \n', n)
+    
     [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean] = ...
                     DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations);
     best_geneIndices(n) = indexOrder(1);
     prevBestGenes = [prevBestGenes best_geneIndices(n)];
     best_gene_names(n) = geneNames_ranked{1};
     top_accuracies(n) = balAcc_ranked(1);
+    
+    %just in case program doesn't finish:
+    save(AccuracyVsNumGenes_filename)
+    
     %stopping criterion: the accuracy decreases
     if (n > 1) && (top_accuracies(n) < top_accuracies(n-1)) 
         break;
     end
 end
 
-save('AccuracyVsNumGenes_Isocortex_Actual.mat')
+save('AccuracyVsNumGenes_Isocortex.mat')

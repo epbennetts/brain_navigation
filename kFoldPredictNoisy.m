@@ -7,6 +7,8 @@ function [predictedLabels] = kFoldPredictNoisy(gene_combo, numAreas, classes, nu
 %iterate through the k folds
 predictedLabels = nan(numAreas,1);
 for k = 1:numFolds
+    %fprintf('CV fold: %d \n', k);
+    
     % SET TRAINING AND TESTING VARS FOR THIS FOLD:
     %indices
     trainIndices = training(partition, k);
