@@ -59,4 +59,4 @@ for n = 1:numGenesInDT
     end
 end
 
-save('AccuracyVsNumGenes_Isocortex.mat')
+save(AccuracyVsNumGenes_filename)
