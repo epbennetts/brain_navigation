@@ -1,10 +1,10 @@
-function params = SetTestParams()
+function params = SetParams_AccVsNoise()
 %Set vars
 
 %DATA
 params.area = 'Isocortex';
 params.cols = 19114;
-params.prevBestGenes = []; %[12782];
+params.prevBestGenes = [];
 
 %TREE
 params.costFunction = 'balanced';
@@ -12,7 +12,7 @@ params.costFunction = 'balanced';
 params.numFolds = 10;
 %noise
 params.noiseStDev = 1;
-params.numNoiseIterations = 20;
+params.numNoiseIterations = 5;
 
 % %PLOTTING
 % params.numplots = 5;
