@@ -13,6 +13,7 @@ params.numFolds = 10;
 %noise
 params.noiseStDev = 1;
 params.numNoiseIterations = 5;
+params.noiseLevelSamples = [0:0.5:3.5]; %[0:0.2:3.5]
 
 % %PLOTTING
 % params.numplots = 5;
