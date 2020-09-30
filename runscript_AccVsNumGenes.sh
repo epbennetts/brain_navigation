@@ -7,10 +7,10 @@
 # PBS -q physics
 #PBS -l select=1:ncpus=12:mem=8GB
 # Set your minimum acceptable walltime, format: day-hours:minutes:seconds
-#PBS -l walltime=20:00:00
+#PBS -l walltime=50:00:00
 # Email user if job ends or aborts(and when it starts)
-# PBS -m ea
-# PBS –M eper8035@uni.sydney.edu.au
+#PBS -m ea
+#PBS –M eper8035@uni.sydney.edu.au
 #PBS -V
 
 # your commands/programs start here, for example:
