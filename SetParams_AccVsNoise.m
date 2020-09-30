@@ -1,10 +1,12 @@
 function params = SetParams_AccVsNoise()
 %Set vars
 
-%DATA
-params.area = 'Isocortex';
 params.cols = 19114;
-params.prevBestGenes = [];
+%MAIN PARAMS (!!)
+params.sizeSampleSubset = cols; %!
+params.area = 'Isocortex';
+params.prevBestGenes = []; 
+
 
 %TREE
 params.costFunction = 'balanced';
@@ -14,6 +16,12 @@ params.numFolds = 10;
 params.noiseStDev = 1;
 params.numNoiseIterations = 5;
 params.noiseLevelSamples = [0:0.5:3.5]; %[0:0.2:3.5]
+
+%FILE NAME
+filename = sprintf('AccuracyVsNoise_%s_%d.mat',params.area,params.sizeSampleSubset);
+params.AccuracyVsNoise_filename = filename;
+
+
 
 % %PLOTTING
 % params.numplots = 5;

@@ -3,9 +3,9 @@ function params = SetParams_AccVsNumGenes()
 
 params.cols = 19114;
 %MAIN PARAMS (!!)
-params.sizeSampleSubset = 100; 
+params.sizeSampleSubset = cols; %!
 params.area = 'Isocortex';
-params.prevBestGenes = []; %[12782];
+params.prevBestGenes = []; 
 
 
 %TREE
