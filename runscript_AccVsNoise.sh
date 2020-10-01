@@ -5,7 +5,7 @@
 #PBS -j oe
 # Specify a queue:
 # PBS -q physics
-#PBS -l select=1:ncpus=12:mem=8GB
+#PBS -l select=1:ncpus=12:mem=32GB
 # Set your minimum acceptable walltime, format: day-hours:minutes:seconds
 #PBS -l walltime=150:00:00
 # Email user if job ends or aborts(and when it starts)
