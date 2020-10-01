@@ -7,4 +7,4 @@
 #PBS -V
 cd "$PBS_O_WORKDIR"
 module load Matlab2019b
-matlab -nodisplay -singleCompThread -r "yourMatlabScript, exit"
+matlab -nodisplay -r "yourMatlabScript, exit"
