@@ -1,9 +1,9 @@
 function params = SetParams_AccVsNumGenes()
 %Set vars
-
-params.cols = 19114;
+cols = 19114; %STATIC
+params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
-params.sizeSampleSubset = 1000; %!
+params.sizeSampleSubset = 10; %!
 params.area = 'Isocortex';
 params.prevBestGenes = []; 
 
@@ -16,7 +16,8 @@ params.numFolds = 10;
 params.noiseStDev = 1;
 params.numNoiseIterations = 5;
 %num genes
-params.numGenesInDT = 10;
+params.maxNumGenesInDT = 10;
+params.prevBestGenes = [];
 
 %FILE NAME
 filename = sprintf('AccuracyVsNumGenes_%s_%d.mat',params.area,params.sizeSampleSubset);

@@ -8,6 +8,7 @@ close all force;
 % Loads in the data, and sets up targets/nontargets for the chosen area:
 %(see how to make SetTestParams() work without having to do area = params.area, etc).
 params = SetParams_AccVsNumGenes();  
+area = params.area;
 [genes, isTarget, classes, geneNames] = filter_nans(area);
 [rows, cols] = size(genes);
 
@@ -17,30 +18,29 @@ params = SetParams_AccVsNumGenes();
 %-------------------------------------------------------------------------------
 %size sample subset
 %area
-%(prev best genes)
+%(prev best genes) --> numGenes in DT 
 %-------------------------------------------------------------------------------
-
-% More Parameters:
 %"Translate" params (do this better)
-area = params.area;
-AccuracyVsNumGenes_filename = params.AccuracyVsNumGenes_filename;
-sizeSampleSubset = params.sizeSampleSubset;
-
+%general fixed
 costFunction = params.costFunction;
-
+%general variable
+sizeSampleSubset = params.sizeSampleSubset;
+AccuracyVsNumGenes_filename = params.AccuracyVsNumGenes_filename;
 noiseStDev = params.noiseStDev;
 numNoiseIterations = params.numNoiseIterations;
 numFolds = params.numFolds;
-numGenesInDT = params.numGenesInDT;
-
+prevBestGenes = params.prevBestGenes;
+%just for this script
+maxNumGenesInDT = params.maxNumGenesInDT;
+%-------------------------------------------------------------------------------
 
 % Initialize arrays
-top_accuracies = NaN(numGenesInDT,1);
-best_geneIndices = NaN(numGenesInDT,1);
-best_gene_names = strings(numGenesInDT,1);
+top_accuracies = NaN(maxNumGenesInDT,1);
+best_geneIndices = NaN(maxNumGenesInDT,1);
+best_gene_names = strings(maxNumGenesInDT,1);
 
 % Greedy approach: Add 1 more gene into the DT each time 
-for n = 1:numGenesInDT
+for n = 1:maxNumGenesInDT
     fprintf('(printed from general) Num genes considered at once in the DT is: %d \n', n)
     
     [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean] = ...
@@ -53,8 +53,8 @@ for n = 1:numGenesInDT
     %just in case program doesn't finish:
     save(AccuracyVsNumGenes_filename)
     
-    %stopping criterion: the accuracy decreases
-    if (n > 1) && (top_accuracies(n) < top_accuracies(n-1)) 
+    %stopping criterion: the accuracy decreases twice
+    if (n > 2) && (top_accuracies(n) < top_accuracies(n-1)) && (top_accuracies(n-1))
         break;
     end
 end
