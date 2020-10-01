@@ -18,7 +18,7 @@ for k = 1:numFolds
     geneDataTest = gene_combo(testIndices,:);
     %class labels
     classLabelsTrain = classes(trainIndices);
-    classLabelsTest = classes(testIndices);
+    %classLabelsTest = classes(testIndices);
     
     %TRAINING
     % Get the training bits and train the model
@@ -27,6 +27,7 @@ for k = 1:numFolds
     %TESTING
     % Add noise to test gene-expression data
     geneDataTestNoisy = geneDataTest + noiseStDev*(randn(size(geneDataTest)));
+    %geneDataTestNoisy = geneDataTest + noiseStDev*randNoiseSaved; %load from outer func
     % Store predictions from the trained model on the noisy test data
     predictedLabels(testIndices) = predict(treeFoldTrain, geneDataTestNoisy);
     

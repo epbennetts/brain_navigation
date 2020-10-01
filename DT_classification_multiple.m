@@ -29,6 +29,10 @@ function [indexOrder, geneNames_ranked, balAccuracies_ranked, confMatrices_ranke
 %samples: size of the gene subset to complete the algorithm on (can choose samples < total #genes for testing)
 %prev_best_genes: indices of the best genes obtained from previous iterations. 
 
+%noise set
+%here or in general?
+rng('default');
+
 %SET VARS
 numGenesInDT = length(prevBestGenes) + 1;
 [genes, isTarget, geneNames, structInfo] = filter_nans(area);
@@ -42,35 +46,44 @@ trees_all_clean = cell(sizeSampleSubset,1);
 
 % %test
 fprintf('NEXT CLASSIFICATION ITERATION \n')
-fprintf('(printed from DT_class) num genes considered at once is: %d \n', numGenesInDT)
+fprintf('(printed from DT_class) num genes considered in DT: %d \n', numGenesInDT)
+
+%set cost function
+costFunc = ComputeBalancedCostFunc(isTarget);
+        
+%MAKE FOLDS
+partitions = cell(numNoiseIterations,1);
+for part = 1:numNoiseIterations
+    %make stratified CV folds
+    partitions{part} = cvpartition(classes,'KFold',numFolds,'Stratify',true);
+end        
+
+
+%MAKE NOISE ITERS
+%here or in general
+%
+
+% Previously selected genes:
+    prevGeneData = genes(:, prevBestGenes);
 
 %loop over genes or subset, classify and evaluate metrics
 % samples == num genes
-for i = 1:sizeSampleSubset
+parfor i = 1:sizeSampleSubset
     %fprintf('NEXT GENE (%d) \n', i)
         
     confMatrices_iter = nan(numNoiseIterations,4);
     balAccuracies_iter = nan(numNoiseIterations,1);
     
-    %why can't do parfor here?
+    %SELECT GENE DATA
+    % Set gene data for this iteration:
+    geneCombo = [prevGeneData genes(:,i)];
+    
     for iter = 1:numNoiseIterations
-        %fprintf('noise iteration: %d (printed from DT_class) \n', iter);
-        
-        %SELECT GENE DATA
-        % Previously selected genes:
-        prevGeneData = genes(:, prevBestGenes);
-        % Set gene data for this iteration:
-        geneCombo = [prevGeneData genes(:,i)];
-        
-        %MAKE FOLDS
-        %set cost function
-        costFunc = ComputeBalancedCostFunc(isTarget);        
-        %make stratified CV folds
-        partition = cvpartition(classes,'KFold',numFolds,'Stratify',true);
+        %fprintf('noise iteration: %d (printed from DT_class) \n', iter);        
                 
         % TRAINING AND TESTING
         %Iterating through CV folds, random noise in testing 
-        [predictedLabels] = kFoldPredictNoisy(geneCombo, rows, classes, numGenesInDT, noiseStDev, costFunc, partition, numFolds);
+        [predictedLabels] = kFoldPredictNoisy(geneCombo, rows, classes, numGenesInDT, noiseStDev, costFunc, partitions{iter}, numFolds);
         
         % Across the folds, predicted class labels are filled into predictedLabels
         % classes == real labels
@@ -94,6 +107,7 @@ end
 [balAccuracies_ranked, indexOrder] = metricSort(balAccuracies, 'descend');
 confMatrices_ranked = confMatrices(indexOrder, :);
 geneNames_ranked = geneNames(indexOrder);
+
 
 
 %-------------------------------------------------------------------------------
