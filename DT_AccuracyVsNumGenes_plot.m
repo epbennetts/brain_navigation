@@ -2,7 +2,7 @@
 
 
 % ACCURACIES PLOT
-DT_plot_accuracies(numGenesInDT, top_accuracies, area)
+DT_plot_accuracies(maxNumGenesInDT, top_accuracies, area)
 
 %PLOT GENE EXPRESSION & THRESHOLDS? 
 % later in separate function:
