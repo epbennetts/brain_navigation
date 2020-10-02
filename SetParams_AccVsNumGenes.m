@@ -16,11 +16,11 @@ params.numFolds = 10;
 params.noiseStDev = 1;
 params.numNoiseIterations = 5;
 %num genes
-params.maxNumGenesInDT = 10;
+params.maxNumGenesInDT = 30;
 params.prevBestGenes = [];
 
 %FILE NAME
-filename = sprintf('AccuracyVsNumGenes_%s_%d.mat',params.area,params.sizeSampleSubset);
+filename = sprintf('AccuracyVsNumGenes_%s_%d.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
 params.AccuracyVsNumGenes_filename = filename;
 
 %STOPPING CRIT
