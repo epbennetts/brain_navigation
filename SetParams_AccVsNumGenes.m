@@ -23,7 +23,9 @@ params.prevBestGenes = [];
 filename = sprintf('AccuracyVsNumGenes_%s_%d.mat',params.area,params.sizeSampleSubset);
 params.AccuracyVsNumGenes_filename = filename;
 
-
+%STOPPING CRIT
+%i.e. stop adding genes after accuracy decreases either 1ce or 2ce
+params.stoppingCrit = 2;
 
 % %PLOTTING
 % params.numplots = 5;

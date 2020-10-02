@@ -17,7 +17,7 @@ params.noiseStDev = 1;
 params.numNoiseIterations = 5;
 %noise samples
 params.maxNumGenesInDT = 1;
-params.noiseLevelSamples = [0:0.2:5]; %[0:0.5:5];
+params.noiseLevelSamples = [0:0.2:8]; %[0:0.5:5];
 numNoiseSamples = size(params.noiseLevelSamples,2);
 
 %FILE NAME
