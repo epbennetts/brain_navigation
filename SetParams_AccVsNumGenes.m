@@ -15,14 +15,17 @@ params.numFolds = 10;
 %noise
 params.noiseStDev = 1;
 params.numNoiseIterations = 5;
-%num genes
-params.maxNumGenesInDT = 30;
-params.prevBestGenes = [];
 
 %FILE NAME
-filename = sprintf('AccuracyVsNumGenes_%s_%d.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
+filename = sprintf('AccuracyVsNumGenes_%s_%d_%d.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
 params.AccuracyVsNumGenes_filename = filename;
 
+%--------------------------------------------------------------------
+%JUST FOR THIS SCRIPT
+%--------------------------------------------------------------------
+%num genes
+params.prevBestGenes = [];
+params.maxNumGenesInDT = 30;
 %STOPPING CRIT
 %i.e. stop adding genes after accuracy decreases either 1ce or 2ce
 params.stoppingCrit = 2;

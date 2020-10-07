@@ -22,7 +22,6 @@ costFunction = params.costFunction;
 %general variable
 sizeSampleSubset = params.sizeSampleSubset;
 AccuracyVsNoise_filename = params.AccuracyVsNoise_filename;
-noiseStDev = params.noiseStDev;
 numNoiseIterations = params.numNoiseIterations;
 numFolds = params.numFolds;
 prevBestGenes = params.prevBestGenes;
