@@ -17,16 +17,15 @@ params.numNoiseIterations = 5;
 %num genes
 params.maxNumGenesInDT = 1;
 
-%FILE NAME
-filename = sprintf('AccuracyVsNoise_%s_%d_%d.mat',params.area,params.sizeSampleSubset,numNoiseSamples);
-params.AccuracyVsNoise_filename = filename;
-
 %--------------------------------------------------------------------
 %JUST FOR THIS SCRIPT
 %--------------------------------------------------------------------
-params.noiseLevelSamples = [0:2:100]; %[0:0.5:5];
+params.noiseLevelSamples = [0:5:100]; %[0:0.5:5];
 numNoiseSamples = size(params.noiseLevelSamples,2);
 
+%FILE NAME
+filename = sprintf('AccuracyVsNoise_%s_%d_%d.mat',params.area,params.sizeSampleSubset,numNoiseSamples);
+params.AccuracyVsNoise_filename = filename;
 
 % %PLOTTING
 % params.numplots = 5;
