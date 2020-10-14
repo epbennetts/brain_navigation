@@ -1,5 +1,5 @@
 
-function [predictedLabels] = kFoldPredictNoisy(geneCombo, noiseCombo, numAreas, classes, numgenes, noiseStDev, costFunc, partition, numFolds)
+function [predictedLabels] = kFoldPredictNoisy(geneCombo, noiseComboIter, numAreas, classes, numgenes, noiseStDev, costFunc, partition, numFolds)
 %Classifies the gene data using k-fold CV, with noise in the test set of each fold
 %Returns: An array of predicted labels/classes.
 %-------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ for k = 1:numFolds
     geneDataTrain = geneCombo(trainIndices,:);
     geneDataTest = geneCombo(testIndices,:);
     %noise
-    geneNoiseTest = noiseCombo(testIndices,:);
+    geneNoiseTest = noiseComboIter(testIndices,:);
     %class labels
     classLabelsTrain = classes(trainIndices);
     %classLabelsTest = classes(testIndices);

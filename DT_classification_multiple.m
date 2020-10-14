@@ -36,12 +36,6 @@ rng('default');
 %SET VARS
 numGenesInDT = length(prevBestGenes) + 1;
 [geneData, isTarget, geneNames, structInfo] = filter_nans(area);
-%MAKE NOISE MATRICES
-geneNoise = NaN(size(geneData,1),size(geneData,2),numNoiseIterations);
-for i = 1:numNoiseIterations
-    geneNoiseTemp = noiseStDev*randn(size(geneData));
-    geneNoise(:,:,i) = geneNoiseTemp; 
-end
 %rows == #areas,  cols = #genes in the data
 [rows, cols] = size(geneData);
 classes = isTarget;
@@ -59,19 +53,22 @@ costFunc = ComputeBalancedCostFunc(isTarget);
         
 %MAKE FOLDS
 partitions = cell(numNoiseIterations,1);
+%MAKE NOISE MATRICES (here or in general?)
+geneNoise = [];
+%NaN(rows, numGenesInDT, numNoiseIterations);
+for i = 1:numNoiseIterations
+    geneNoiseCol = noiseStDev*randn(rows,1);    
+    geneNoiseTemp = repmat(geneNoiseCol,1,numGenesInDT);
+    geneNoise = cat(3, geneNoise, geneNoiseTemp);
+end
+
 for part = 1:numNoiseIterations
     %make stratified CV folds
     partitions{part} = cvpartition(classes,'KFold',numFolds,'Stratify',true);
 end        
 
-
-%MAKE NOISE ITERS
-%here or in general
-%
-
 % Previously selected genes:
     prevGeneData = geneData(:, prevBestGenes);
-    prevGeneNoise = geneNoise(:, prevBestGenes,:);
 
 %loop over genes or subset, classify and evaluate metrics
 % samples == num genes
@@ -85,11 +82,10 @@ parfor i = 1:sizeSampleSubset
     %SELECT GENE DATA
     % Set gene data for this iteration:
     geneCombo = [prevGeneData geneData(:,i)];
-    noiseCombo = [prevGeneNoise geneNoise(:,i,:)];
     
     for iter = 1:numNoiseIterations
         %fprintf('noise iteration: %d (printed from DT_class) \n', iter);        
-        noiseComboIter = noiseCombo(:,:,iter);        
+        noiseComboIter = geneNoise(:,:,iter);        
         
         % TRAINING AND TESTING
         %Iterating through CV folds, random noise in testing 
