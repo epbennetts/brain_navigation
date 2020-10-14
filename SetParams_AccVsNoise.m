@@ -24,7 +24,7 @@ params.AccuracyVsNoise_filename = filename;
 %--------------------------------------------------------------------
 %JUST FOR THIS SCRIPT
 %--------------------------------------------------------------------
-params.noiseLevelSamples = [0:0.2:8]; %[0:0.5:5];
+params.noiseLevelSamples = [0:2:100]; %[0:0.5:5];
 numNoiseSamples = size(params.noiseLevelSamples,2);
 
 
