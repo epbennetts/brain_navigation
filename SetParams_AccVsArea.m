@@ -18,8 +18,8 @@ params.numNoiseIterations = 5;
 params.maxNumGenesInDT = 1;
 
 %FILE NAME
-filename = sprintf('AccuracyVsAreas_%d_%d.mat',params.sizeSampleSubset,params.maxNumGenesInDT);
-params.AccuracyVsAreas_filename = filename;
+filename = sprintf('AccuracyVsArea_%d_%d.mat',params.sizeSampleSubset,params.maxNumGenesInDT);
+params.AccuracyVsArea_filename = filename;
 
 %--------------------------------------------------------------------
 %JUST FOR THIS SCRIPT

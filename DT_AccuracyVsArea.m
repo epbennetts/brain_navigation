@@ -17,7 +17,7 @@ params = SetParams_AccVsArea();
 costFunction = params.costFunction;
 %general variable
 sizeSampleSubset = params.sizeSampleSubset;
-AccuracyVsAreas_filename = params.AccuracyVsAreas_filename;
+AccuracyVsArea_filename = params.AccuracyVsArea_filename;
 noiseStDev = params.noiseStDev;
 numNoiseIterations = params.numNoiseIterations;
 numFolds = params.numFolds;
@@ -34,10 +34,11 @@ areaNames_doubledUp = structInfo{:,5};
 areaNames_redundant = structInfo{:,5};
 areaIndices = [1];
 areaNames = {};
+areaNames = [areaNames; areaNames_redundant{1}];
 
 for i = 1:(size(areaNames_redundant,1)-1)
     if ~strcmp(areaNames_redundant{i}, areaNames_redundant{i+1})
-        areaNames = [areaNames; areaNames_redundant{i}];
+        areaNames = [areaNames; areaNames_redundant{i+1}];
         areaIndices = [areaIndices; i+1];
     end
 end
@@ -63,6 +64,6 @@ for n = 1:numAreas
     accuracies(n) = balAcc_ranked(1);
     
 end
+disp('finished')
 
-
-save(AccuracyVsAreas_filename)
+save(AccuracyVsArea_filename)
