@@ -35,9 +35,15 @@ rng('default');
 
 %SET VARS
 numGenesInDT = length(prevBestGenes) + 1;
-[genes, isTarget, geneNames, structInfo] = filter_nans(area);
+[geneData, isTarget, geneNames, structInfo] = filter_nans(area);
+%MAKE NOISE MATRICES
+geneNoise = NaN(size(geneData,1),size(geneData,2),numNoiseIterations);
+for i = 1:numNoiseIterations
+    geneNoiseTemp = noiseStDev*randn(size(geneData));
+    geneNoise(:,:,i) = geneNoiseTemp; 
+end
 %rows == #areas,  cols = #genes in the data
-[rows, cols] = size(genes);
+[rows, cols] = size(geneData);
 classes = isTarget;
 %empty arrays
 balAccuracies = zeros(sizeSampleSubset,1);
@@ -64,10 +70,12 @@ end
 %
 
 % Previously selected genes:
-    prevGeneData = genes(:, prevBestGenes);
+    prevGeneData = geneData(:, prevBestGenes);
+    prevGeneNoise = geneNoise(:, prevBestGenes,:);
 
 %loop over genes or subset, classify and evaluate metrics
 % samples == num genes
+%parpool('local', 12)
 parfor i = 1:sizeSampleSubset
     %fprintf('NEXT GENE (%d) \n', i)
         
@@ -76,14 +84,16 @@ parfor i = 1:sizeSampleSubset
     
     %SELECT GENE DATA
     % Set gene data for this iteration:
-    geneCombo = [prevGeneData genes(:,i)];
+    geneCombo = [prevGeneData geneData(:,i)];
+    noiseCombo = [prevGeneNoise geneNoise(:,i,:)];
     
     for iter = 1:numNoiseIterations
         %fprintf('noise iteration: %d (printed from DT_class) \n', iter);        
-                
+        noiseComboIter = noiseCombo(:,:,iter);        
+        
         % TRAINING AND TESTING
         %Iterating through CV folds, random noise in testing 
-        [predictedLabels] = kFoldPredictNoisy(geneCombo, rows, classes, numGenesInDT, noiseStDev, costFunc, partitions{iter}, numFolds);
+        [predictedLabels] = kFoldPredictNoisy(geneCombo, noiseComboIter, rows, classes, numGenesInDT, noiseStDev, costFunc, partitions{iter}, numFolds);
         
         % Across the folds, predicted class labels are filled into predictedLabels
         % classes == real labels
