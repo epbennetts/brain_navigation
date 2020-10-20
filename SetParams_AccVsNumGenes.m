@@ -5,7 +5,6 @@ params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
 params.sizeSampleSubset = cols; %!
 params.area = 'Thalamus';
-params.prevBestGenes = []; 
 
 
 %TREE
@@ -16,10 +15,6 @@ params.numFolds = 10;
 params.noiseStDev = 1;
 params.numNoiseIterations = 5;
 
-%FILE NAME
-filename = sprintf('AccuracyVsNumGenes_%s_%d_%d.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
-params.AccuracyVsNumGenes_filename = filename;
-
 %--------------------------------------------------------------------
 %JUST FOR THIS SCRIPT
 %--------------------------------------------------------------------
@@ -29,6 +24,10 @@ params.maxNumGenesInDT = 30;
 %STOPPING CRIT
 %i.e. stop adding genes after accuracy decreases either 1ce or 2ce
 params.stoppingCrit = 2;
+
+%FILE NAME
+filename = sprintf('AccuracyVsNumGenes_%s_%d_%d.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
+params.AccuracyVsNumGenes_filename = filename;
 
 % %PLOTTING
 % params.numplots = 5;
