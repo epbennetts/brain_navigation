@@ -4,7 +4,7 @@ cols = 19114; %STATIC
 params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
 params.sizeSampleSubset = cols; %!
-params.area = 'Medulla';
+params.area = 'Striatum';
 
 
 %TREE
@@ -20,7 +20,7 @@ params.numNoiseIterations = 5;
 %--------------------------------------------------------------------
 %num genes
 params.prevBestGenes = [];
-params.maxNumGenesInDT = 30;
+params.maxNumGenesInDT = 10;
 %STOPPING CRIT
 %i.e. stop adding genes after accuracy decreases either 1ce or 2ce
 params.stoppingCrit = 2;
