@@ -3,8 +3,8 @@ function params = SetParams_AccVsNumGenes()
 cols = 19114; %STATIC
 params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
-params.sizeSampleSubset = 10; %!
-params.area = 'Cerebellar nuclei';
+params.sizeSampleSubset = cols; %!
+params.area = 'Olfactory Areas';
 
 
 %TREE
