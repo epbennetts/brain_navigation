@@ -3,8 +3,8 @@ function params = SetParams_AccVsNumGenes()
 cols = 19114; %STATIC
 params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
-params.sizeSampleSubset = cols; %!
-params.area = 'Cerebellar Cortex';
+params.sizeSampleSubset = 10; %!
+params.area = 'Olfactory Areas';
 
 
 %TREE
@@ -28,6 +28,9 @@ params.stoppingCrit = 2;
 %FILE NAME
 filename = sprintf('AccuracyVsNumGenes_%s_%d_%d.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
 params.AccuracyVsNumGenes_filename = filename;
+
+filename_lighter = sprintf('AccuracyVsNumGenes_%s_%d_%d_lighter.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
+params.AccuracyVsNumGenes_filename_lighter = filename_lighter;
 
 % %PLOTTING
 % params.numplots = 5;

@@ -1,5 +1,6 @@
 %Uses the .mat file or workspace obtained from cluster to plot Accuracy vs numGenesC 
 
+%CLEAR WORKSPACE BEFORE RUNNING
 
 % ACCURACIES PLOT
 DT_plot_accuracies(maxNumGenesInDT, top_accuracies, area)

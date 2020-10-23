@@ -26,6 +26,7 @@ costFunction = params.costFunction;
 %general variable
 sizeSampleSubset = params.sizeSampleSubset;
 AccuracyVsNumGenes_filename = params.AccuracyVsNumGenes_filename;
+AccuracyVsNumGenes_filename_lighter = params.AccuracyVsNumGenes_filename_lighter;
 noiseStDev = params.noiseStDev;
 numNoiseIterations = params.numNoiseIterations;
 numFolds = params.numFolds;
@@ -40,6 +41,10 @@ top_accuracies = NaN(maxNumGenesInDT,1);
 best_geneIndices = NaN(maxNumGenesInDT,1);
 best_gene_names = strings(maxNumGenesInDT,1);
 
+geneNames_ranked_all = cell(sizeSampleSubset, maxNumGenesInDT);
+confMatrices_ranked_all = NaN(sizeSampleSubset, 4, maxNumGenesInDT);
+balAcc_ranked = NaN(sizeSampleSubset, maxNumGenesInDT);
+
 % Greedy approach: Add 1 more gene into the DT each time
 for n = 1:maxNumGenesInDT
     fprintf('(printed from general) Num genes considered at once in the DT is: %d \n', n)
@@ -51,8 +56,13 @@ for n = 1:maxNumGenesInDT
     best_gene_names(n) = geneNames_ranked{1};
     top_accuracies(n) = balAcc_ranked(1);
     
+    geneNames_ranked_all(:,n) = geneNames_ranked;
+    %confMatrices_ranked_all(:,:,n) = confMatrices_ranked(sizeSampleSubset, 4, maxNumGenesInDT);
+    balAcc_ranked_all(:,n) = balAcc_ranked;
+    
     %just in case program doesn't finish:
-    save(AccuracyVsNumGenes_filename)
+    AccuracyVsNumGenes_filename_temp = sprintf('AccuracyVsNumGenes_%s_%d_%d_temp.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
+    save(AccuracyVsNumGenes_filename_temp);
     
     %stopping criterion: stop if the accuracy decreases either once or twice
     if (stoppingCrit == 1)
@@ -68,3 +78,5 @@ for n = 1:maxNumGenesInDT
 end
 
 save(AccuracyVsNumGenes_filename)
+Main_Results = struct('best_gene_names', best_gene_names, 'maxNumGenesInDT', maxNumGenesInDT, 'top_accuracies', top_accuracies, 'area', area)
+%save(AccuracyVsNumGenes_filename_lighter, best_gene_names,maxNumGenesInDT, top_accuracies, area)
