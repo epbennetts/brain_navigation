@@ -4,7 +4,7 @@ cols = 19114; %STATIC
 params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
 params.sizeSampleSubset = cols; %!
-params.area = 'Pons';
+params.area = 'Cerebellar Nuclei';
 
 
 %TREE
