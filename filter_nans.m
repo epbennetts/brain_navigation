@@ -1,10 +1,10 @@
-function [genes, isTarget, geneNames, rowLabels] = filter_nans(area)
+function [genes, isTarget, geneNames, rowInfo] = filter_nans(area)
 
 %load new dataset (have to check which section)
 load('AllenGeneDataset_19419_Ben.mat');
 genes = GeneExpData.combZ.energy; %for example
-colLabels = geneInfo;
-rowLabels = structInfo;
+colInfo = geneInfo;
+rowInfo = structInfo;
 
 %calc how many nans in rows and cols
 propNansRows = mean(isnan(genes),2);
@@ -26,13 +26,13 @@ max_nans_cols = 0.1;
 doRemove = (propNansCols > max_nans_cols);
 %remove the arrays at indices with 1
 genes(:,doRemove) = [];
-colLabels(doRemove,:) = [];
+colInfo(doRemove,:) = [];
 
 %rows
 doRemove = (propNansRows > max_nans_rows);
 genes(doRemove,:) = [];
-rowLabels(doRemove,:) = [];
-areas = table2array(rowLabels(:,5));
+rowInfo(doRemove,:) = [];
+areas = table2array(rowInfo(:,5));
 
 [rows, cols] = size(genes);
 
@@ -64,6 +64,6 @@ for i = 1:rows
 end
 
 nans_left = genes(isnan(genes));  % --> none left
-geneNames = table2array(colLabels(:,1));
+geneNames = table2array(colInfo(:,1));
 
 end
