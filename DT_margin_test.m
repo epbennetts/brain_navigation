@@ -5,7 +5,7 @@ clear all;
 %nonTarget = rand(100000,1);
 
 %make dummy data
-targetCentre = 5;  
+targetCentre = 10;  
 nonTargetCentre = 0;
 targetSize = 1000;  
 nonTargetSize = 10000;
@@ -53,15 +53,17 @@ view(tree_bal,'Mode','graph')
 %gene expr histograms
 figure()
 hold on;
-title('Gene expression of dummy targets and non-targets');
+%title('Gene expression');
 histogram(target, 'Normalization', 'count', 'BinWidth', 0.2);
 histogram(nonTarget, 'Normalization', 'count', 'BinWidth', 0.1);
 %xticks(-5:1:6)
 %thresholds
-xline(threshold_unbal, '--r', 'LineWidth', 1);
+%xline(threshold_unbal, '--r', 'LineWidth', 1);
 xline(threshold_bal, '--g', 'LineWidth', 1);
 %legend
-legend({'target', '~target', 'threshold'},'Location','northwest'); %legend({'target', '~target', 'unbalanced', 'balanced'},'Location','northwest');
+legend({'target','~target','threshold'}, 'Location','northwest');
+xlabel('gene expression')
+ylabel('counts')
 hold off;
 
 %PLOT 2 -- histograms but with target modified to look like it has similar counts
@@ -70,13 +72,15 @@ hold off;
 %gene expr histograms
 figure()
 hold on;
-title('Gene expression of dummy targets and non-targets');
+%title('Gene expression');
 histogram(target_magnified, 'Normalization', 'count', 'BinWidth', 0.2);
 histogram(nonTarget, 'Normalization', 'count', 'BinWidth', 0.1);
 %xticks(-5:1:6)
 %thresholds
-xline(threshold_unbal, '--r', 'LineWidth', 1);
+%xline(threshold_unbal, '--r', 'LineWidth', 1);
 xline(threshold_bal, '--g', 'LineWidth', 1);
 %legend
-legend({'target','~target','unbalanced','balanced'}, 'Location','northwest');
+legend({'target','~target','threshold'}, 'Location','northwest');
+xlabel('gene expression')
+ylabel('counts')
 hold off;
