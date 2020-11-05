@@ -5,7 +5,7 @@ close all force;
 % Loads in the data, and sets up targets/nontargets for the chosen area:
 params = SetParams_AccVsNoise(); 
 area = params.area;
-[genes, isTarget, classes, geneNames] = filter_nans(area);
+genes = filter_nans(area);
 [rows, cols] = size(genes);
 
 %-------------------------------------------------------------------------------

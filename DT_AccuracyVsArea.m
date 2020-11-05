@@ -28,7 +28,6 @@ prevBestGenes = params.prevBestGenes;
 
 %load area info
 load('AllenGeneDataset_19419_Ben.mat', '-mat');
-areaNames_doubledUp = structInfo{:,5}; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 areaNames_redundant = structInfo{:,5};
@@ -54,7 +53,7 @@ for n = 1:numAreas
 %     end
     % Load in the data, and set up targets/nontargets for the chosen area:
     area_curr = areaNames{n};
-    [genes, isTarget, classes, geneNames] = filter_nans(area_curr);
+    genes = filter_nans(area_curr);
     [rows, cols] = size(genes);
     
     %run algorithm on this area
