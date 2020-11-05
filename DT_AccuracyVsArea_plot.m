@@ -6,7 +6,7 @@ Y = accuracies;
 bar(X,Y);
 title(sprintf('Accuracy vs area'));
 xlabel('Area')
-ylabel('Accuracy')
+ylabel('Balanced Accuracy (%)')
 %set(gca,'xtick', 0:numgenes)
 grid on;
-
+hold on;
