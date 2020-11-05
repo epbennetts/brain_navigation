@@ -40,16 +40,18 @@ numGenesInDT = length(prevBestGenes) + 1;
 [rows, cols] = size(geneData);
 classes = isTarget;
 %empty arrays
-balAccuracies = zeros(sizeSampleSubset,1);
-confMatrices = zeros(sizeSampleSubset,4);
+balAccuracies_avg = zeros(sizeSampleSubset,1);
+confMatrices_avg = zeros(sizeSampleSubset,4);
 trees_all_clean = cell(sizeSampleSubset,1);
+%predictedLabels_all = NaN(rows,numNoiseIterations);
 
 % %test
+fprintf('**SAMPLES = %d**\n', sizeSampleSubset)
 fprintf('NEXT CLASSIFICATION ITERATION \n')
-fprintf('(printed from DT_class) num genes considered in DT: %d \n', numGenesInDT)
+fprintf('(printed from DT_class) num genes considered in DT: %d \n\n', numGenesInDT)
 
 %set cost function
-costFunc = ComputeBalancedCostFunc(isTarget);
+costFunc = ComputeBalancedCostFunc(classes);
         
 %MAKE FOLDS
 partitions = cell(numNoiseIterations,1);
@@ -73,6 +75,7 @@ end
 %loop over genes or subset, classify and evaluate metrics
 % samples == num genes
 %parpool('local', 12)
+
 parfor i = 1:sizeSampleSubset
     %fprintf('NEXT GENE (%d) \n', i)
         
@@ -84,12 +87,17 @@ parfor i = 1:sizeSampleSubset
     geneCombo = [prevGeneData geneData(:,i)];
     
     for iter = 1:numNoiseIterations
+        %predictedLabels_all(:,iter) = Nans(1,iter);
+        
         %fprintf('noise iteration: %d (printed from DT_class) \n', iter);        
         noiseComboIter = geneNoise(:,:,iter);        
         
         % TRAINING AND TESTING
         %Iterating through CV folds, random noise in testing 
         [predictedLabels] = kFoldPredictNoisy(geneCombo, noiseComboIter, rows, classes, numGenesInDT, noiseStDev, costFunc, partitions{iter}, numFolds);
+        %save in external function because of parfor
+        doSaveLabels('Labels_LatestIter',predictedLabels);
+        %predictedLabels_all(:,iter) = predictedLabels;
         
         % Across the folds, predicted class labels are filled into predictedLabels
         % classes == real labels
@@ -102,17 +110,19 @@ parfor i = 1:sizeSampleSubset
     trees_all_clean{i,1} = tree_clean;
     
     %conf matrices
-    confMatrix = mean(confMatrices_iter, 1);
-    confMatrices(i,:) = confMatrix;
+    confMatrix_avg = mean(confMatrices_iter, 1);
+    confMatrices_avg(i,:) = confMatrix_avg;
     %bal accuracies
-    balAccuracies(i) = mean(balAccuracies_iter);
+    balAccuracies_avg(i) = mean(balAccuracies_iter);
     
 end
 
 %sort accuracies
-[balAccuracies_ranked, indexOrder] = metricSort(balAccuracies, 'descend');
-confMatrices_ranked = confMatrices(indexOrder, :);
+[balAccuracies_ranked, indexOrder] = metricSort(balAccuracies_avg, 'descend');
+confMatrices_ranked = confMatrices_avg(indexOrder, :);
 geneNames_ranked = geneNames(indexOrder);
+
+save('Workspace_Latest_Iteration.mat')
 
 
 

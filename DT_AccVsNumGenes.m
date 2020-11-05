@@ -77,6 +77,6 @@ for n = 1:maxNumGenesInDT
     
 end
 
+Main_Results = struct('best_gene_names', best_gene_names, 'maxNumGenesInDT', maxNumGenesInDT, 'top_accuracies', top_accuracies, 'area', area);
 save(AccuracyVsNumGenes_filename)
-Main_Results = struct('best_gene_names', best_gene_names, 'maxNumGenesInDT', maxNumGenesInDT, 'top_accuracies', top_accuracies, 'area', area)
 %save(AccuracyVsNumGenes_filename_lighter, best_gene_names,maxNumGenesInDT, top_accuracies, area)
