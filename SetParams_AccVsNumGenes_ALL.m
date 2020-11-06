@@ -1,13 +1,9 @@
 function params = SetParams_AccVsNumGenes_ALL()
-%acc vs numgenes for all/multiple areas
-
 %Set vars
-cols = 19114; %STATIC
+cols = 10; %STATIC
 params.cols = cols; %STATIC
-%MAIN PARAMS (!!)----------------------------
-params.sizeSampleSubset = 10; %!
-%%%%%%%%%%params.areas = 'Cerebellar Nuclei';
-
+%MAIN PARAMS (!!)
+params.sizeSampleSubset = 10; %!VARIABLE!
 
 %TREE
 params.costFunction = 'balanced';
@@ -21,19 +17,20 @@ params.numNoiseIterations = 5;
 %JUST FOR THIS SCRIPT
 %--------------------------------------------------------------------
 %num genes
-params.prevBestGenes = [];
 params.maxNumGenesInDT = 10;
 %STOPPING CRIT
 %i.e. stop adding genes after accuracy decreases either 1ce or 2ce
-params.stoppingCrit = 2;
+%0 means no stopping criterion
+params.stoppingCrit = 0;
 
 %FILE NAME
-filename = sprintf('AccuracyVsNumGenes_allAreas_%d_%d.mat',params.sizeSampleSubset,params.maxNumGenesInDT);
-params.AccuracyVsNumGenes_AllAreas_filename = filename;
+filename = sprintf('AccVsNumGenes_ALL_%d_%dgenes_%diters.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.numNoiseIterations);
+params.AccuracyVsNumGenes_ALL_filename = filename;
 
-filename_lighter = sprintf('AccuracyVsNumGenes_allAreas_%d_%d_lighter.mat',params.sizeSampleSubset,params.maxNumGenesInDT);
-params.AccuracyVsNumGenes_AllAreas_filename_lighter = filename_lighter;
+filename_lighter = sprintf('AccVsNumGenes_ALL_%d_%dgenes_%diters_lighter.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.numNoiseIterations);
+params.AccuracyVsNumGenes_ALL_filename_lighter = filename_lighter;
 
+params.AccuracyVsNumGenes_ALL_filename_temp = sprintf('AccuracyVsNumGenes_ALL_%d_%dgenes_%diters_temp.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.numNoiseIterations);
 % %PLOTTING
 % params.numplots = 5;
 % params.range = 'top';
