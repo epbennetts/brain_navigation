@@ -19,7 +19,7 @@
 % %how many genes considered in this run:
 % samples = 5;
 
-function [indexOrder, geneNames_ranked, balAccuracies_ranked, confMatrices_ranked, trees_all_clean] = DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
+function [indexOrder, geneNames_ranked, balAccuracies_ranked, confMatrices_ranked, trees_all_clean, balAcc_stDevs_ranked] = DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
 %
 %Finds the gene within the sample that performs best at classifying the target areas with a DT, in combination with prev_best_genes.
 %Ranks genes according to performance (balanced accuracy).
@@ -43,6 +43,7 @@ classes = isTarget;
 balAccuracies_avg = zeros(sizeSampleSubset,1);
 confMatrices_avg = zeros(sizeSampleSubset,4);
 trees_all_clean = cell(sizeSampleSubset,1);
+balAcc_stDevs = zeros(sizeSampleSubset,1);
 %predictedLabels_all = NaN(rows,numNoiseIterations);
 
 % %test
@@ -76,6 +77,8 @@ end
 % samples == num genes
 %parpool('local', 12)
 
+confMatrices_iter = nan(numNoiseIterations,4);
+balAccuracies_iter = nan(numNoiseIterations,1);
 parfor i = 1:sizeSampleSubset
     %fprintf('NEXT GENE (%d) \n', i)
         
@@ -95,9 +98,9 @@ parfor i = 1:sizeSampleSubset
         % TRAINING AND TESTING
         %Iterating through CV folds, random noise in testing 
         [predictedLabels] = kFoldPredictNoisy(geneCombo, noiseComboIter, rows, classes, numGenesInDT, noiseStDev, costFunc, partitions{iter}, numFolds);
-        %save in external function because of parfor
-        doSaveLabels('Labels_LatestIter',predictedLabels);
-        %predictedLabels_all(:,iter) = predictedLabels;
+%         %save in external function because of parfor
+%         doSaveLabels('Labels_LatestIter',predictedLabels);
+%         %predictedLabels_all(:,iter) = predictedLabels;
         
         % Across the folds, predicted class labels are filled into predictedLabels
         % classes == real labels
@@ -114,6 +117,9 @@ parfor i = 1:sizeSampleSubset
     confMatrices_avg(i,:) = confMatrix_avg;
     %bal accuracies
     balAccuracies_avg(i) = mean(balAccuracies_iter);
+    %std deviations of the accuracies
+    balAcc_stDev = std(balAccuracies_iter);
+    balAcc_stDevs(i) = balAcc_stDev;
     
 end
 
@@ -121,6 +127,7 @@ end
 [balAccuracies_ranked, indexOrder] = metricSort(balAccuracies_avg, 'descend');
 confMatrices_ranked = confMatrices_avg(indexOrder, :);
 geneNames_ranked = geneNames(indexOrder);
+balAcc_stDevs_ranked = balAcc_stDevs(indexOrder);
 
 save('Workspace_Latest_Iteration.mat')
 

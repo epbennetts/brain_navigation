@@ -3,10 +3,10 @@
 %CLEAR WORKSPACE BEFORE RUNNING
 
 % ACCURACIES PLOT
-DT_plot_accuracies(maxNumGenesInDT, top_accuracies, area)
+DT_plot_accuracies(maxNumGenesInDT, top_accuracies,top_accs_stdevs, area)
 hold on;
 
-%PLOT GENE EXPRESSION & THRESHOLDS? 
+%PLOT GENE EXPRESSION & THRESHOLDS?
 % later in separate function:
 % %Plot thresholds
 % numplots = 5;

@@ -57,7 +57,7 @@ for n = 1:numAreas
     [rows, cols] = size(genes);
     
     %run algorithm on this area
-    [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean] = ...
+    [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean, balAcc_stDevs_ranked] = ...
     DT_classification_multiple(sizeSampleSubset, area_curr, prevBestGenes, noiseStDev, numFolds, numNoiseIterations); 
     
     accuracies(n) = balAcc_ranked(1);

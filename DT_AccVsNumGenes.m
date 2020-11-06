@@ -2,7 +2,7 @@
 %time. Allows to see how accuracy changes as we increase the number of genes
 %in the DT.
 
-clear vars;
+clear all;
 close all force;
 
 % Loads in the data, and sets up targets/nontargets for the chosen area:
@@ -38,10 +38,12 @@ stoppingCrit = params.stoppingCrit;
 
 % Initialize arrays
 top_accuracies = NaN(maxNumGenesInDT,1);
+top_accs_stdevs = NaN(maxNumGenesInDT,1);
 best_geneIndices = NaN(maxNumGenesInDT,1);
 best_gene_names = strings(maxNumGenesInDT,1);
 
 geneNames_ranked_all = cell(sizeSampleSubset, maxNumGenesInDT);
+balAcc_ranked_all = zeros(sizeSampleSubset, maxNumGenesInDT);
 confMatrices_ranked_all = NaN(sizeSampleSubset, 4, maxNumGenesInDT);
 balAcc_ranked = NaN(sizeSampleSubset, maxNumGenesInDT);
 
@@ -49,12 +51,13 @@ balAcc_ranked = NaN(sizeSampleSubset, maxNumGenesInDT);
 for n = 1:maxNumGenesInDT
     fprintf('(printed from general) Num genes considered at once in the DT is: %d \n', n)
     
-    [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean] = ...
+    [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean, balAcc_stDevs_ranked] = ...
         DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations);
     best_geneIndices(n) = indexOrder(1);
     prevBestGenes = [prevBestGenes best_geneIndices(n)];
     best_gene_names(n) = geneNames_ranked{1};
     top_accuracies(n) = balAcc_ranked(1);
+    top_accs_stdevs(n) = balAcc_stDevs_ranked(1);
     
     geneNames_ranked_all(:,n) = geneNames_ranked;
     %confMatrices_ranked_all(:,:,n) = confMatrices_ranked(sizeSampleSubset, 4, maxNumGenesInDT);

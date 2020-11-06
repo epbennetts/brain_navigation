@@ -37,7 +37,7 @@ topAccuracies = NaN(numNoiseSamples,1);
 for n = 1:numNoiseSamples
     fprintf('(Printed from general) NOISE LEVEL iteration: %d \n', n);
     fprintf('Noise lev: %d \n', noiseLevelSamples(n));
-    [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean] = ...
+    [indexOrder, geneNames_ranked, balAcc_ranked, confMatrices_ranked, trees_all_clean, balAcc_stDevs_ranked] = ...
                     DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseLevelSamples(n), numFolds, numNoiseIterations);
     topAccuracies(n) = balAcc_ranked(1);
     
