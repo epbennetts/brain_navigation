@@ -11,7 +11,7 @@ params.costFunction = 'balanced';
 params.numFolds = 10;
 %noise
 params.noiseStDev = 1;
-params.numNoiseIterations = 5;
+params.numNoiseIterations = 20;
 
 %--------------------------------------------------------------------
 %JUST FOR THIS SCRIPT
@@ -24,13 +24,13 @@ params.maxNumGenesInDT = 10;
 params.stoppingCrit = 0;
 
 %FILE NAME
-filename = sprintf('AccVsNumGenes_ALL_%d_%dgenes_%diters.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.numNoiseIterations);
+filename = sprintf('AccVsNumGenes_ALL_%d_%dgenes_%dnoiselev_%diters.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.noiseStDev,params.numNoiseIterations);
 params.AccuracyVsNumGenes_ALL_filename = filename;
 
-filename_lighter = sprintf('AccVsNumGenes_ALL_%d_%dgenes_%diters_lighter.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.numNoiseIterations);
+filename_lighter = sprintf('AccVsNumGenes_ALL_%d_%dgenes_%dnoiselev_%diters_lighter.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.noiseStDev,params.numNoiseIterations);
 params.AccuracyVsNumGenes_ALL_filename_lighter = filename_lighter;
 
-params.AccuracyVsNumGenes_ALL_filename_temp = sprintf('AccuracyVsNumGenes_ALL_%d_%dgenes_%diters_temp.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.numNoiseIterations);
+params.AccuracyVsNumGenes_ALL_filename_temp = sprintf('AccuracyVsNumGenes_ALL_%d_%dgenes_%dnoiselev_%diters_temp.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.noiseStDev,params.numNoiseIterations);
 % %PLOTTING
 % params.numplots = 5;
 % params.range = 'top';
