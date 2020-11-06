@@ -3,8 +3,8 @@ function params = SetParams_AccVsNumGenes()
 cols = 19114; %STATIC
 params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
-params.sizeSampleSubset = cols; %!
-params.area = 'Cerebellar Nuclei';
+params.sizeSampleSubset = 10; %!VARIABLE!
+params.area = 'Isocortex';
 
 
 %TREE
@@ -23,13 +23,14 @@ params.prevBestGenes = [];
 params.maxNumGenesInDT = 10;
 %STOPPING CRIT
 %i.e. stop adding genes after accuracy decreases either 1ce or 2ce
-params.stoppingCrit = 2;
+%0 means no stopping criterion
+params.stoppingCrit = 0;
 
 %FILE NAME
-filename = sprintf('AccuracyVsNumGenes_%s_%d_%d.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
+filename = sprintf('AccuracyVsNumGenes_%s_%d_%dgenes_%diters.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT,params.numNoiseIterations);
 params.AccuracyVsNumGenes_filename = filename;
 
-filename_lighter = sprintf('AccuracyVsNumGenes_%s_%d_%d_lighter.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
+filename_lighter = sprintf('AccuracyVsNumGenes_%s_%d_%dgenes_%diters_lighter.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT,params.numNoiseIterations);
 params.AccuracyVsNumGenes_filename_lighter = filename_lighter;
 
 % %PLOTTING
