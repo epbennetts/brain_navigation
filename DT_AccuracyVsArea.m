@@ -27,25 +27,15 @@ prevBestGenes = params.prevBestGenes;
 %-------------------------------------------------------------------------------
 
 %load area info
-load('AllenGeneDataset_19419_Ben.mat', '-mat');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-areaNames_redundant = structInfo{:,5};
-areaIndices = [1];
-areaNames = {};
-areaNames = [areaNames; areaNames_redundant{1}];
-
-for i = 1:(size(areaNames_redundant,1)-1)
-    if ~strcmp(areaNames_redundant{i}, areaNames_redundant{i+1})
-        areaNames = [areaNames; areaNames_redundant{i+1}];
-        areaIndices = [areaIndices; i+1];
-    end
-end
+load('AllenGeneDataset_19419_Ben.mat', 'structInfo');
+areaNames_doubledUp = structInfo{:,5};
+areaNames = getDistinctAreas(areaNames_doubledUp);
 numAreas = size(areaNames,1); 
+
 % Initialize arrays
 accuracies = NaN(numAreas,1);
 
-% Loop through areas
+% Loop through areas, classify & get accuracies per area
 for n = 1:numAreas
     disp(areaNames(n))
 %     if (n>1) && (strcmp(areas_cell{n},areas_cell{n-1}))
@@ -66,3 +56,7 @@ end
 disp('finished')
 
 save(AccuracyVsArea_filename)
+
+WarnWave = [sin(1:.6:400), sin(1:.7:400), sin(1:.4:400)];
+Audio = audioplayer(WarnWave, 22050);
+play(Audio);
