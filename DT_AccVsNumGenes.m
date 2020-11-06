@@ -37,8 +37,8 @@ stoppingCrit = params.stoppingCrit;
 %-------------------------------------------------------------------------------
 
 % Initialize arrays
-best_accuracies = NaN(maxNumGenesInDT,1);
-best_accs_stdevs = NaN(maxNumGenesInDT,1);
+top_accuracies = NaN(maxNumGenesInDT,1);
+top_accs_stdevs = NaN(maxNumGenesInDT,1);
 best_geneIndices = NaN(maxNumGenesInDT,1);
 best_gene_names = strings(maxNumGenesInDT,1);
 
@@ -56,34 +56,30 @@ for n = 1:maxNumGenesInDT
     best_geneIndices(n) = indexOrder(1);
     prevBestGenes = [prevBestGenes best_geneIndices(n)];
     best_gene_names(n) = geneNames_ranked{1};
-    best_accuracies(n) = balAcc_ranked(1);
-    best_accs_stdevs(n) = balAcc_stDevs_ranked(1);
+    top_accuracies(n) = balAcc_ranked(1);
+    top_accs_stdevs(n) = balAcc_stDevs_ranked(1);
     
     geneNames_ranked_all(:,n) = geneNames_ranked;
     %confMatrices_ranked_all(:,:,n) = confMatrices_ranked(sizeSampleSubset, 4, maxNumGenesInDT);
     balAcc_ranked_all(:,n) = balAcc_ranked;
     
     %just in case program doesn't finish:
-    AccuracyVsNumGenes_filename_temp = sprintf('AccuracyVsNumGenes_%s_%d_%dgenes_%diters_temp.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT,params.numNoiseIterations);
+    AccuracyVsNumGenes_filename_temp = sprintf('AccuracyVsNumGenes_%s_%d_%d_temp.mat',params.area,params.sizeSampleSubset,params.maxNumGenesInDT);
     save(AccuracyVsNumGenes_filename_temp);
     
     %stopping criterion: stop if the accuracy decreases either once or twice
     if (stoppingCrit == 1)
-        if (n > 1) && (best_accuracies(n) < best_accuracies(n-1))
+        if (n > 1) && (top_accuracies(n) < top_accuracies(n-1))
             break;
         end
     elseif (stoppingCrit == 2)
-        if (n > 2) && (best_accuracies(n) < best_accuracies(n-1)) && (best_accuracies(n-1) < best_accuracies(n-2))
+        if (n > 2) && (top_accuracies(n) < top_accuracies(n-1)) && (top_accuracies(n-1) < top_accuracies(n-2))
             break;
         end
     end
     
 end
 
-Main_Results = struct('best_gene_names', best_gene_names, 'maxNumGenesInDT', maxNumGenesInDT, 'top_accuracies', best_accuracies, 'area', area);
+Main_Results = struct('best_gene_names', best_gene_names, 'maxNumGenesInDT', maxNumGenesInDT, 'top_accuracies', top_accuracies, 'area', area);
 save(AccuracyVsNumGenes_filename)
 %save(AccuracyVsNumGenes_filename_lighter, best_gene_names,maxNumGenesInDT, top_accuracies, area)
-
-WarnWave = [sin(1:.6:400), sin(1:.7:400), sin(1:.4:400)];
-Audio = audioplayer(WarnWave, 22050);
-play(Audio);
