@@ -3,14 +3,14 @@ function params = SetParams_AccVsNumGenes_ALL()
 cols = 10; %STATIC
 params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
-params.sizeSampleSubset = 10; %!VARIABLE!
+params.sizeSampleSubset = cols; %!VARIABLE!
 
 %TREE
 params.costFunction = 'balanced';
 %CV
 params.numFolds = 10;
 %noise
-params.noiseStDev = 1;
+params.noiseStDev = 0;
 params.numNoiseIterations = 5;
 
 %--------------------------------------------------------------------
