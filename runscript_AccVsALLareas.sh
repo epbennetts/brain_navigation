@@ -1,7 +1,7 @@
 #!/bin/csh
 # Set name of job
 #PBS -N DTBrainGenes
-#PBS -o out_AccVsArea.txt
+#PBS -o out_AccVsNumGenes_AllAreas.txt
 #PBS -j oe
 # Specify a queue:
 # PBS -q physics
