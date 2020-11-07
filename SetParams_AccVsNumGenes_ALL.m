@@ -11,7 +11,7 @@ params.costFunction = 'balanced';
 params.numFolds = 10;
 %noise
 params.noiseStDev = 0;
-params.numNoiseIterations = 20;
+params.numNoiseIterations = 10;
 
 %--------------------------------------------------------------------
 %JUST FOR THIS SCRIPT
