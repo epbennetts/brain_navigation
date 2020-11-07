@@ -1,6 +1,6 @@
 function params = SetParams_AccVsNumGenes_ALL()
 %Set vars
-cols = 10; %STATIC
+cols = 19114; %STATIC
 params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
 params.sizeSampleSubset = cols; %!VARIABLE!
