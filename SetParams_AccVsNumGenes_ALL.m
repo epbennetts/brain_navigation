@@ -10,8 +10,8 @@ params.costFunction = 'balanced';
 %CV
 params.numFolds = 10;
 %noise
-params.noiseStDev = 0.2;
-params.numNoiseIterations = 5;
+params.noiseStDev = 0;
+params.numNoiseIterations = 1;
 
 %--------------------------------------------------------------------
 %JUST FOR THIS SCRIPT
