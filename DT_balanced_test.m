@@ -1,11 +1,12 @@
 close all force;
 clear all;
 
+set(0,'DefaultAxesColorOrder','default');
 %target = rand(1000,1)+1;
 %nonTarget = rand(100000,1);
 
 %make dummy data
-targetCentre = 5;  
+targetCentre = 3;  
 nonTargetCentre = 0;
 targetSize = 1000;  
 nonTargetSize = 10000;
@@ -51,32 +52,41 @@ view(tree_bal,'Mode','graph')
 
 %PLOT 1
 %gene expr histograms
+%UNBALANCED
 figure()
 hold on;
-title('Gene expression of dummy targets and non-targets');
+%title('Gene expression');
 histogram(target, 'Normalization', 'count', 'BinWidth', 0.2);
 histogram(nonTarget, 'Normalization', 'count', 'BinWidth', 0.1);
 %xticks(-5:1:6)
 %thresholds
 xline(threshold_unbal, '--r', 'LineWidth', 1);
-xline(threshold_bal, '--g', 'LineWidth', 1);
+%xline(threshold_bal, '--g', 'LineWidth', 1);
 %legend
-legend({'target', '~target', 'threshold'},'Location','northwest'); %legend({'target', '~target', 'unbalanced', 'balanced'},'Location','northwest');
+legend({'target','~target','threshold'}, 'Location','northwest');
+title('Unbalanced algorithm')
+xlabel('gene expression')
+ylabel('weight')
 hold off;
 
-%PLOT 2 -- histograms but with target modified to look like it has similar counts
+%PLOT 2 
+%BALANCED
+%-- histograms but with target modified to look like it has similar counts
 %(Except it looks as if there are 2x as many targets because we're repeating
 %the exact same examples...)
 %gene expr histograms
 figure()
 hold on;
-title('Gene expression of dummy targets and non-targets');
+%title('Gene expression');
 histogram(target_magnified, 'Normalization', 'count', 'BinWidth', 0.2);
 histogram(nonTarget, 'Normalization', 'count', 'BinWidth', 0.1);
 %xticks(-5:1:6)
 %thresholds
-xline(threshold_unbal, '--r', 'LineWidth', 1);
+%xline(threshold_unbal, '--r', 'LineWidth', 1);
 xline(threshold_bal, '--g', 'LineWidth', 1);
 %legend
-legend({'target','~target','unbalanced','balanced'}, 'Location','northwest');
+legend({'target','~target','threshold'}, 'Location','northwest');
+title('Balanced algorithm')
+xlabel('gene expression')
+ylabel('weight')
 hold off;
