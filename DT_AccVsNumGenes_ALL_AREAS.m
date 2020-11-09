@@ -70,7 +70,7 @@ for a = 1:numAreas
     geneNames_ranked_all = cell(sizeSampleSubset, maxNumGenesInDT);
     balAcc_ranked_all = zeros(sizeSampleSubset, maxNumGenesInDT);
     confMatrices_ranked_all = NaN(sizeSampleSubset, 4, maxNumGenesInDT);
-    balAcc_ranked = NaN(sizeSampleSubset, maxNumGenesInDT);
+    balAcc_ranked = NaN(sizeSampleSubset, maxNumGenesInDT); %don't need this?? also should be 1 col?
     
     % Greedy approach: Add 1 more gene into the DT each time
     for n = 1:maxNumGenesInDT
