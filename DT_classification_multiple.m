@@ -44,7 +44,7 @@ balAccuracies_avg = zeros(sizeSampleSubset,1);
 confMatrices_avg = zeros(sizeSampleSubset,4);
 trees_all_clean = cell(sizeSampleSubset,1);
 balAcc_stDevs = zeros(sizeSampleSubset,1);
-%predictedLabels_all = NaN(rows,numNoiseIterations);
+predictedLabels_all = NaN(sizeSampleSubset,rows,numNoiseIterations);
 
 % %test
 fprintf('**SAMPLES = %d**\n', sizeSampleSubset)
@@ -100,7 +100,7 @@ parfor i = 1:sizeSampleSubset
         [predictedLabels] = kFoldPredictNoisy(geneCombo, noiseComboIter, rows, classes, numGenesInDT, noiseStDev, costFunc, partitions{iter}, numFolds);
 %         %save in external function because of parfor
 %         doSaveLabels('Labels_LatestIter',predictedLabels);
-%         %predictedLabels_all(:,iter) = predictedLabels;
+         predictedLabels_all(i,:,iter) = predictedLabels;
         
         % Across the folds, predicted class labels are filled into predictedLabels
         % classes == real labels

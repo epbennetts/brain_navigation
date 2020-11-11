@@ -1,9 +1,19 @@
+
+
 figure();
 %set(0,'DefaultAxesColorOrder',hsv(numAreas));
 for a = 1:numAreas
     area = areaNames(a);
     bestAccs_temp = bestAccs_ALL(:,a);
     bestAccs_stdevs_temp = bestAccs_stdevs_ALL(:,a);
+    
+    
+    for i = 2:size(bestAccs_temp)
+       %for noise = 0 case: if saturates,  make the rest of array NaN 
+       if noiseStDev==0 && (bestAccs_temp(i) == bestAccs_temp(i-1))
+           bestAccs_temp(i:size(bestAccs_temp)) = NaN;
+       end
+    end
     
     %Accuracies vs numgenes    
     %Plot accuracy increase:
@@ -17,7 +27,7 @@ for a = 1:numAreas
     ylabel('Balanced Accuracy (%)')
     set(gca,'xtick', 0:maxNumGenesInDT)
     xlim([0.5 10.5])
-    ylim([0.85 1.01])
+    ylim([0.7 1.01])
     grid on;
     hold on;
 end

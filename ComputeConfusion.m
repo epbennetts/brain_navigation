@@ -12,13 +12,13 @@ tn = sum(predictedLabels==0 & realLabels==0);
 confusionMatrix = [tp, fp, fn, tn];
 
 % Compute balanced accuracy:
-if tp == 0 || (tp+fp) == 0
+%if tp == 0 || (tp+fp) == 0
+if (tp+fn) == 0 || (tn+fp) == 0
     %accuracy = (0 + tn/(tn+fn))/2;
     balAcc = 0;
 else
     balAcc = (tp/(tp+fn) + tn/(tn+fp))/2;
 end
-
 
 
 end

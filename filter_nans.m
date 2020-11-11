@@ -18,6 +18,7 @@ propNansCols = mean(isnan(genes),1);
 % histogram(propNansCols,'Normalization', 'probability', 'BinLimits',[0,0.3]);
 % title('Proportion of nans in columns')
 
+%proportion of rows or cols that are allowed to be nans: 
 max_nans_rows = 0.1;
 max_nans_cols = 0.1;
 
