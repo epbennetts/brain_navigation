@@ -18,8 +18,8 @@ for a = 1:numAreas
     %Accuracies vs numgenes    
     %Plot accuracy increase:
     numgenes_array = 1:maxNumGenesInDT;
-    %errorbar(numgenes_array, bestAccs_temp, bestAccs_stdevs_temp,'.-');
-    p1 = plot(numgenes_array, bestAccs_temp, '.-', 'LineWidth',1);
+    p1 = errorbar(numgenes_array, bestAccs_temp, bestAccs_stdevs_temp,'.-');
+    %p1 = plot(numgenes_array, bestAccs_temp, '.-', 'LineWidth',1);
     p1.Color(4) = 0.4;
     legend(areaNames, 'Location', 'bestOutside')
     title(sprintf('Balanced Accuracy vs num genes in all areas (noise: %d)', noiseStDev));
