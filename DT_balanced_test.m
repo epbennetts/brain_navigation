@@ -4,6 +4,8 @@ clear all;
 set(0,'DefaultAxesColorOrder','default');
 %target = rand(1000,1)+1;
 %nonTarget = rand(100000,1);
+f = figure;
+%f.Color = 'w';
 
 %make dummy data
 targetCentre = 3;  
@@ -14,11 +16,10 @@ target = normrnd(targetCentre,1,targetSize, 1);
 nonTarget = normrnd(nonTargetCentre,1,nonTargetSize, 1);
 allData = [target; nonTarget];
 %for visualising target in histogram:
-modifier = 2; %because otherwise looks like there are more targets... Justify or just make 100% random set
-x_repetitions = nonTargetSize/targetSize/modifier; %assumes target is smallest
+modifier = 5; %because otherwise looks like there are more targets... Justify or just make 100% random set
+x_repetitions = nonTargetSize/targetSize - modifier; %assumes target is smallest
 y_repetitions = 1;
 target_magnified = repmat(target, x_repetitions, y_repetitions);
-
 
 %set classes
 classes = zeros(size(target,1)+size(nonTarget,1),1);
@@ -66,7 +67,7 @@ xline(threshold_unbal, '--r', 'LineWidth', 1);
 legend({'target','~target','threshold'}, 'Location','northwest');
 title('Unbalanced algorithm')
 xlabel('gene expression')
-ylabel('weight')
+ylabel('counts')
 hold off;
 
 %PLOT 2 
@@ -88,5 +89,5 @@ xline(threshold_bal, '--g', 'LineWidth', 1);
 legend({'target','~target','threshold'}, 'Location','northwest');
 title('Balanced algorithm')
 xlabel('gene expression')
-ylabel('weight')
+ylabel('balanced weights')
 hold off;

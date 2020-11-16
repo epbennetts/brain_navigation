@@ -6,13 +6,20 @@ set(0,'DefaultAxesColorOrder','default');
 %nonTarget = rand(100000,1);
 
 %make dummy data 1
-targetCentre = 8;  
+targetCentre = 3;  
 nonTargetCentre = 0;
 targetSize = 1000;  
 nonTargetSize = 10000;
 target1 = normrnd(targetCentre,1,targetSize, 1);
 nonTarget1 = normrnd(nonTargetCentre,1,nonTargetSize, 1);
 allData1 = [target1; nonTarget1];
+% %make it look balanced
+% modifier = 5;
+% x_repetitions = nonTargetSize/targetSize - modifier; %assumes target is smallest
+% y_repetitions = 1;
+% target_magnified = repmat(target1, x_repetitions, y_repetitions);
+% allData1 = [target_magnified; nonTarget1];
+
 
 %make dummy data 2
 sep = 2;
