@@ -2,7 +2,7 @@
 % clear all;
 % close all force;
 % %see how to make SetTestParams() work without having to do area = %params.area, etc. 
-% params = SetTestParams(); 
+% params = SetParams_AccVsNumGenes(); 
 % 
 % %"Translate" params (do this better)
 % area = params.area;
@@ -14,10 +14,14 @@
 % numNoiseIterations = params.numNoiseIterations;
 % numFolds = params.numFolds;
 % %plotting
-% numplots = params.numplots;
-% range = params.range;
+% %numplots = params.numplots;
+% %range = params.range;
 % %how many genes considered in this run:
 % samples = 5;
+% numplots = 5;
+% range = 'top';
+% sizeSampleSubset = 5;
+% numGenes = 10;
 
 function [indexOrder, geneNames_ranked, balAccuracies_ranked, confMatrices_ranked, trees_all_clean, balAcc_stDevs_ranked] = DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
 %
@@ -140,17 +144,17 @@ save('Workspace_Latest_Iteration.mat')
 % %HISTOGRAMS
 % numBins = 10;
 % plotAccuracyHistogram(balAccuracies_ranked, numBins, numGenesInDT, area, sizeSampleSubset)
-
- 
- 
+% 
+%  
+%  
 % %plotting vars:
-% prevGeneData = genes(:, prevBestGenes);
+% prevGeneData = geneData(:, prevBestGenes);
 % thresholds_all_clean = nan(samples, numGenes);
 % %non/target indices (to plot them differently)
 % targetIndices = isTarget;
 % nonTargetIndices = find(~isTarget);
-% target = genes(targetIndices, :);
-% nonTarget = genes(nonTargetIndices, :);
+% target = geneData(targetIndices, :);
+% nonTarget = geneData(nonTargetIndices, :);
 % 
 % %various plotting thresholds
 % if strcmp(range,'top')
@@ -231,12 +235,12 @@ save('Workspace_Latest_Iteration.mat')
 %             
 %             %plot data points, formatting corresponding to area and class 
 %             if isTarget(a)
-%                 x = genes(a,prevBestGenes);
-%                 y = genes(a,i);
+%                 x = geneData(a,prevBestGenes);
+%                 y = geneData(a,i);
 %                 errorbar(x, y, avgNoise, 'both', '*', 'color', colour)
 %             else
-%                 x = genes(a,prevBestGenes);
-%                 y = genes(a,i);
+%                 x = geneData(a,prevBestGenes);
+%                 y = geneData(a,i);
 %                 errorbar(x, y, avgNoise, 'both', '.', 'color', colour)
 %             end            
 %         end
@@ -244,8 +248,8 @@ save('Workspace_Latest_Iteration.mat')
 %         %make square plot
 %         axis equal
 %         %axis limits
-%         xlim([min(genes(:,prevBestGenes)) - 0.1, max(genes(:,prevBestGenes)) + 0.1])
-%         ylim([min(genes(:,i)) - 0.1, max(genes(:,i)) + 0.1])        
+%         xlim([min(geneData(:,prevBestGenes)) - 0.1, max(geneData(:,prevBestGenes)) + 0.1])
+%         ylim([min(geneData(:,i)) - 0.1, max(geneData(:,i)) + 0.1])        
 %         
 %         %plot thresholds
 %         if strcmp(genesUsed{1,1}, 'x1')
@@ -269,4 +273,4 @@ save('Workspace_Latest_Iteration.mat')
 %         %legend({'target', 'threshold', '~target'});
 %         
 %     end
-% end
+end
