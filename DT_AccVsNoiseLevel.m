@@ -47,6 +47,6 @@ end
 
 save(AccuracyVsNoise_filename)
 
-WarnWave = [sin(1:.6:400), sin(1:.7:400), sin(1:.4:400)];
-Audio = audioplayer(WarnWave, 22050);
-play(Audio);
+% WarnWave = [sin(1:.6:400), sin(1:.7:400), sin(1:.4:400)];
+% Audio = audioplayer(WarnWave, 22050);
+% play(Audio);
