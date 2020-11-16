@@ -19,4 +19,4 @@ cd "$PBS_O_WORKDIR"
 hostname
 # Launch the Matlab job
 module load Matlab2019b
-matlab -nodisplay -r "DT_AccuracyVsNoiseLevel; exit"
+matlab -nodisplay -r "DT_AccVsNoiseLevel; exit"
