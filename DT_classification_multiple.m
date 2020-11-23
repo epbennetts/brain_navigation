@@ -23,7 +23,7 @@
 % sizeSampleSubset = 5;
 % numGenes = 10;
 
-function [indexOrder, geneNames_ranked, balAccuracies_ranked, confMatrices_ranked, trees_all_clean, balAcc_stDevs_ranked] = DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
+function [indexOrder, geneNames_ranked, balAccuracies_ranked, confMatrices_ranked, trees_all_clean, balAcc_errors_ranked] = DT_classification_multiple(sizeSampleSubset, area, prevBestGenes, noiseStDev, numFolds, numNoiseIterations)
 %
 %Finds the gene within the sample that performs best at classifying the target areas with a DT, in combination with prev_best_genes.
 %Ranks genes according to performance (balanced accuracy).
@@ -47,7 +47,7 @@ classes = isTarget;
 balAccuracies_avg = zeros(sizeSampleSubset,1);
 confMatrices_avg = zeros(sizeSampleSubset,4);
 trees_all_clean = cell(sizeSampleSubset,1);
-balAcc_stDevs = zeros(sizeSampleSubset,1);
+balAcc_errors = zeros(sizeSampleSubset,1);
 predictedLabels_all = NaN(sizeSampleSubset,rows,numNoiseIterations);
 
 % %test
@@ -122,8 +122,8 @@ parfor i = 1:sizeSampleSubset
     %bal accuracies
     balAccuracies_avg(i) = mean(balAccuracies_iter);
     %std deviations of the accuracies
-    balAcc_stDev = std(balAccuracies_iter);
-    balAcc_stDevs(i) = balAcc_stDev;
+    balAcc_error = std(balAccuracies_iter);
+    balAcc_errors(i) = balAcc_error;
     
 end
 
@@ -131,7 +131,7 @@ end
 [balAccuracies_ranked, indexOrder] = metricSort(balAccuracies_avg, 'descend');
 confMatrices_ranked = confMatrices_avg(indexOrder, :);
 geneNames_ranked = geneNames(indexOrder);
-balAcc_stDevs_ranked = balAcc_stDevs(indexOrder);
+balAcc_errors_ranked = balAcc_errors(indexOrder);
 
 save('Workspace_Latest_Iteration.mat')
 
