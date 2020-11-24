@@ -7,5 +7,6 @@ errorbar(noiseLevelSamples, topAccuracies.*100, topAccs_errors,'.-b');
 title(sprintf('Accuracy vs noise level in %s (samples: %d, iters: %d, folds: %d, numGenes: %d)', area, sizeSampleSubset, numNoiseIterations, numFolds, numGenes_temp));
 xlabel('Noise level used (\sigma)')
 ylabel('Balanced Accuracy (%)')
+%xlim([0 4])
 %set(gca,'xtick', 0:numgenes)
 grid on;
