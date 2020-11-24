@@ -30,7 +30,7 @@ costFunction = params.costFunction;
 sizeSampleSubset = params.sizeSampleSubset;
 AccuracyVsNumGenes_ALL_filename = params.AccuracyVsNumGenes_ALL_filename;
 AccuracyVsNumGenes_ALL_filename_lighter = params.AccuracyVsNumGenes_ALL_filename_lighter;
-AccVsNumGenes_ALL_filename_temp = params.AccuracyVsNumGenes_ALL_filename_temp; 
+%AccVsNumGenes_ALL_filename_temp = params.AccuracyVsNumGenes_ALL_filename_temp; 
 noiseStDev = params.noiseStDev;
 numNoiseIterations = params.numNoiseIterations;
 numFolds = params.numFolds;
@@ -90,7 +90,7 @@ for a = 1:numAreas
         balAcc_ranked_all(:,n) = balAcc_ranked;
         
         %just in case program doesn't finish:
-        save(AccVsNumGenes_ALL_filename_temp);
+        %save(AccVsNumGenes_ALL_filename_temp);
         
         %stopping criterion: stop if the accuracy decreases either once or twice
         if (stoppingCrit == 1)
