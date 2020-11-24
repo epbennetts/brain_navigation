@@ -10,7 +10,7 @@ params.costFunction = 'balanced';
 %CV
 params.numFolds = 10;
 %noise
-params.noiseStDev = 0;
+params.noiseStDev = 1;
 params.numNoiseIterations = 10;
 
 %--------------------------------------------------------------------
@@ -24,7 +24,7 @@ params.maxNumGenesInDT = 10;
 params.stoppingCrit = 0;
 
 %FILE NAME
-filename = sprintf('AccVsNumGenes_ALL_%d_%dgenes_%dnoiselev_%diters.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.noiseStDev,params.numNoiseIterations);
+filename = sprintf('AccVsNumGenes_ALL_%d_%s_%dnoiselev_%dgenes_%diters.mat',params.sizeSampleSubset,date,params.noiseStDev,params.maxNumGenesInDT,params.numNoiseIterations);
 params.AccuracyVsNumGenes_ALL_filename = filename;
 
 filename_lighter = sprintf('AccVsNumGenes_ALL_%d_%dgenes_%dnoiselev_%diters_lighter.mat',params.sizeSampleSubset,params.maxNumGenesInDT,params.noiseStDev,params.numNoiseIterations);

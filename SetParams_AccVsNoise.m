@@ -24,10 +24,12 @@ i_start = 0;
 i_step = 0.25;
 i_end = 4;
 params.noiseLevelSamples = [i_start:i_step:i_end]; %[0:0.5:5];
+numNoisePoints = size(params.noiseLevelSamples,2);
 %numNoiseSamples = size(params.noiseLevelSamples,2);
 
 %FILE NAME
-filename = sprintf('AccuracyVsNoise_%s_%d_%dto%d.mat',params.area,params.sizeSampleSubset,i_start, i_end);
+today=date;
+filename = sprintf('AccuracyVsNoise_%s_%d_%s_%dto%d_%dpoints.mat',params.area,params.sizeSampleSubset,today,i_start, i_end,numNoisePoints);
 params.AccuracyVsNoise_filename = filename;
 
 % %PLOTTING
