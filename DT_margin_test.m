@@ -6,12 +6,12 @@ set(0,'DefaultAxesColorOrder','default');
 %nonTarget = rand(100000,1);
 
 %make dummy data 1
-targetCentre = 3;  
-nonTargetCentre = 0;
+targetCentre = 2;  
+nonTargetCentre = -2;
 targetSize = 1000;  
 nonTargetSize = 10000;
-target1 = normrnd(targetCentre,1,targetSize, 1);
-nonTarget1 = normrnd(nonTargetCentre,1,nonTargetSize, 1);
+target1 = normrnd(targetCentre,0.9,targetSize, 1);
+nonTarget1 = normrnd(nonTargetCentre,0.9,nonTargetSize, 1);
 allData1 = [target1; nonTarget1];
 % %make it look balanced
 % modifier = 5;
@@ -23,8 +23,8 @@ allData1 = [target1; nonTarget1];
 
 %make dummy data 2
 sep = 2;
-nonTarget2 = nonTarget1-sep;
-target2 = target1 + sep;
+nonTarget2 = normrnd(nonTargetCentre-sep,1.2,nonTargetSize, 1);
+target2 =  normrnd(targetCentre+sep,1.3,targetSize, 1);
 allData2 = [target2; nonTarget2];
 
 %set classes
@@ -54,26 +54,30 @@ predictedLabels = predict(tree2, allData2);
 
 
 %view
-view(tree1,'Mode','graph')
-view(tree2,'Mode','graph')
+% view(tree1,'Mode','graph')
+% view(tree2,'Mode','graph')
 
 %PLOT 1
 %gene expr histograms
 %UNBALANCED
 figure()
 hold on;
+box on;
 %title('Gene expression');
-histogram(target1, 'Normalization', 'count', 'BinWidth', 0.2);
-histogram(nonTarget1, 'Normalization', 'count', 'BinWidth', 0.1);
+histogram(target1, 'Normalization', 'count', 'BinWidth', 0.2, 'Facecolor', [0.2 0.8 0.2]);
+histogram(nonTarget1, 'Normalization', 'count', 'BinWidth', 0.1, 'FaceColor', [0.9 0.3 0.3]);
+set(gca,'fontsize', 12);
 %xticks(-5:1:6)
 %thresholds
-xline(threshold1, '--r', 'LineWidth', 1);
+x1 = xline(threshold1, '--r', 'LineWidth', 1.5);
 %xline(threshold_bal, '--g', 'LineWidth', 1);
 %legend
-legend({'target','~target','threshold'}, 'Location','northeast');
+legend({'target','non-target','threshold'}, 'Location','northeast');
 title('Small margin')
 xlabel('gene expression')
 ylabel('counts')
+xlim([-8,8])
+ylim([0,500])
 hold off;
 
 %PLOT 2 
@@ -84,16 +88,20 @@ hold off;
 %gene expr histograms
 figure()
 hold on;
+box on;
 %title('Gene expression');
-histogram(target2, 'Normalization', 'count', 'BinWidth', 0.2);
-histogram(nonTarget2, 'Normalization', 'count', 'BinWidth', 0.1);
+histogram(target2, 'Normalization', 'count', 'BinWidth', 0.2, 'Facecolor', [0.2 0.8 0.2]);
+histogram(nonTarget2, 'Normalization', 'count', 'BinWidth', 0.1, 'FaceColor', [0.9 0.3 0.3]);
+set(gca,'fontsize', 12);
 %xticks(-5:1:6)
 %thresholds
 %xline(threshold_unbal, '--r', 'LineWidth', 1);
-xline(threshold2, '--g', 'LineWidth', 1);
+xline(threshold2, '--g', 'LineWidth', 1.5);
 %legend
-legend({'target','~target','threshold'}, 'Location','northeast');
+legend({'target','non-target','threshold'}, 'Location','northeast');
 title('Large margin')
 xlabel('gene expression')
 ylabel('counts')
+xlim([-8,8])
+ylim([0,500])
 hold off;
