@@ -3,7 +3,7 @@ function params = SetParams_AccVsArea()
 cols = 19114; %STATIC
 params.cols = cols; %STATIC
 %MAIN PARAMS (!!)
-params.sizeSampleSubset = cols; %!
+params.sizeSampleSubset = cols; %!VARIABLE!
 params.prevBestGenes = []; 
 
 
